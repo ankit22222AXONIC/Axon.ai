@@ -168,6 +168,12 @@ function OsirisMap({ data, activeLayers, onEntityClick, onMouseCoords, onRightCl
     }
   }, []);
 
+  useEffect(() => {
+    const handleGlobalToggle = () => setGesturesActive(prev => !prev);
+    window.addEventListener('toggle-osiris-gestures', handleGlobalToggle);
+    return () => window.removeEventListener('toggle-osiris-gestures', handleGlobalToggle);
+  }, []);
+
   /** Drops the selection: the ring, the orbit track and the readout together.
    *  Leaving any one of them behind is what made a closed popup look like a
    *  still-selected satellite. */

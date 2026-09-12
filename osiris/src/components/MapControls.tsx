@@ -53,21 +53,22 @@ export default function MapControls({ mapRef, onInteract, onToggleGestures, gest
         <div className="flex flex-col gap-[3px]">
           <Btn label="Zoom in" move={{ kind: 'zoom', dir: 1 }} icon={Plus} disabled={limits.max} press={press} release={release} step={step} />
           <Btn label="Zoom out" move={{ kind: 'zoom', dir: -1 }} icon={Minus} disabled={limits.min} press={press} release={release} step={step} />
-          {onToggleGestures && (
-            <button
-              type="button"
-              onClick={onToggleGestures}
-              title={gesturesActive ? "Air Gestures Active — Click to disable" : "Enable Touchless Air Gestures (Webcam Hand Tracking)"}
-              aria-label="Toggle air gestures"
-              className={`w-10 h-10 md:w-8 md:h-8 rounded-md flex items-center justify-center transition-all ${
-                gesturesActive
-                  ? "bg-emerald-500/25 text-emerald-400 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.35)]"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--hover-accent)]"
-              }`}
-            >
-              <Hand className="w-3.5 h-3.5" strokeWidth={1.75} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              if (onToggleGestures) onToggleGestures();
+              else window.dispatchEvent(new CustomEvent('toggle-osiris-gestures'));
+            }}
+            title={gesturesActive ? "Air Gestures Active — Click to disable" : "Enable Touchless Air Gestures (Webcam Hand Tracking)"}
+            aria-label="Toggle air gestures"
+            className={`w-10 h-10 md:w-8 md:h-8 rounded-md flex items-center justify-center transition-all ${
+              gesturesActive
+                ? "bg-emerald-500/30 text-emerald-400 border border-emerald-500/60 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+                : "text-[var(--text-secondary)] hover:text-emerald-400 hover:bg-[var(--hover-accent)] hover:border hover:border-emerald-500/30"
+            }`}
+          >
+            <Hand className="w-3.5 h-3.5" strokeWidth={1.75} />
+          </button>
         </div>
         <div className="desktop-only flex items-center gap-1">
           <div aria-hidden="true" className="h-12 w-px mx-1 bg-[var(--border-secondary)]" />
