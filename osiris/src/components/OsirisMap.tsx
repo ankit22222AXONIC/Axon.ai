@@ -2,6 +2,7 @@
 
 import { buildGeometry, closeRing, drawReducer, initialDrawState, measure, type DrawAction, type DrawMode, type DrawProgress, type DrawResult, type DrawState } from '@/lib/draw';
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
+import dynamic from 'next/dynamic';
 import * as maplibregl from 'maplibre-gl';
 import { installTerrainTileProtocol } from '@/lib/terrain-tiles';
 import { createSatelliteLayer, parseColor, type SatPoint } from '@/lib/satellite-layer';
@@ -13,6 +14,8 @@ import CctvPreviews, { type PreviewCamera } from '@/components/CctvPreviews';
 import MapControls from '@/components/MapControls';
 import LiveNewsPreviews, { type PreviewFeed } from '@/components/LiveNewsPreviews';
 import { attachTerrain, type TerrainStatus } from '@/lib/map-terrain';
+
+const GestureControlPanel = dynamic(() => import('@/components/GestureControlPanel'), { ssr: false });
 
 import { applyMapProjection } from '@/lib/map-projection';
 
@@ -139,6 +142,31 @@ function OsirisMap({ data, activeLayers, onEntityClick, onMouseCoords, onRightCl
    *  around the marker rather than around the moment it was clicked. */
   const satEpochRef = useRef<number | null>(null);
   const [selectedSat, setSelectedSat] = useState<SatelliteDetail | null>(null);
+  const [gesturesActive, setGesturesActive] = useState(false);
+
+  const handleGestureAction = useCallback((action: { type: string; dx: number; dy: number; zoomDelta: number }) => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (action.type === 'fist_lock') {
+      map.stop();
+      return;
+    }
+
+    if (action.type === 'reset') {
+      map.easeTo({ zoom: 1.8, pitch: 0, bearing: 0, duration: 1000 });
+      return;
+    }
+
+    if (action.type === 'pan' && (Math.abs(action.dx) > 0 || Math.abs(action.dy) > 0)) {
+      map.panBy([-action.dx, -action.dy], { duration: 0 });
+    }
+
+    if (action.type === 'pinch_zoom' && Math.abs(action.zoomDelta) > 0) {
+      const nextZoom = Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), map.getZoom() + action.zoomDelta));
+      map.easeTo({ zoom: nextZoom, duration: 80 });
+    }
+  }, []);
 
   /** Drops the selection: the ring, the orbit track and the readout together.
    *  Leaving any one of them behind is what made a closed popup look like a
@@ -3054,7 +3082,21 @@ function OsirisMap({ data, activeLayers, onEntityClick, onMouseCoords, onRightCl
         />
       )}
       {selectedSat && <SatelliteCard sat={selectedSat} onClose={clearSat} />}
-      {mapReady && <MapControls mapRef={mapRef} onInteract={onFollowInterrupt} />}
+      {mapReady && (
+        <MapControls
+          mapRef={mapRef}
+          onInteract={onFollowInterrupt}
+          gesturesActive={gesturesActive}
+          onToggleGestures={() => setGesturesActive(prev => !prev)}
+        />
+      )}
+      {mapReady && gesturesActive && (
+        <GestureControlPanel
+          isOpen={gesturesActive}
+          onClose={() => setGesturesActive(false)}
+          onGesture={handleGestureAction}
+        />
+      )}
     </>
   );
 }
