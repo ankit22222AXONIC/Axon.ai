@@ -124,70 +124,74 @@ export default function GestureControlPanel({ onGesture, isOpen, onClose }: Gest
     requestRef.current = requestAnimationFrame(processFrame);
   }, [onGesture]);
 
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const startGestureEngine = useCallback(async () => {
+    try {
+      setLoading(true);
+      setCameraError(null);
+
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+
+      // Initialize MediaPipe detector
+      if (!detectorRef.current) {
+        detectorRef.current = new HandDetectorService();
+        await detectorRef.current.initialize();
+      }
+
+      // Request webcam
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 480 },
+          height: { ideal: 360 },
+          facingMode: 'user'
+        },
+        audio: false
+      });
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+
+      setLoading(false);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      requestRef.current = requestAnimationFrame(processFrame);
+    } catch (err: any) {
+      console.error('Camera access or model load error:', err);
+      setCameraError(err.name === 'NotAllowedError' ? 'Permission denied by browser' : (err.message || 'Camera access error'));
+      setLoading(false);
+    }
+  }, [processFrame]);
+
   useEffect(() => {
     if (!isOpen) {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(t => t.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
       return;
     }
 
-    let stream: MediaStream | null = null;
-    let isCancelled = false;
-
-    async function startGestureEngine() {
-      try {
-        setLoading(true);
-        setCameraError(null);
-
-        // Initialize MediaPipe detector
-        if (!detectorRef.current) {
-          detectorRef.current = new HandDetectorService();
-          await detectorRef.current.initialize();
-        }
-
-        // Request webcam
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 480 },
-            height: { ideal: 360 },
-            facingMode: 'user'
-          },
-          audio: false
-        });
-
-        if (isCancelled) {
-          stream.getTracks().forEach(t => t.stop());
-          return;
-        }
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-
-        setLoading(false);
-        requestRef.current = requestAnimationFrame(processFrame);
-      } catch (err: any) {
-        console.error('Camera access or model load error:', err);
-        setCameraError(err.message || 'Camera permission denied');
-        setLoading(false);
-      }
-    }
-
     startGestureEngine();
 
     return () => {
-      isCancelled = true;
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
       }
     };
-  }, [isOpen, processFrame]);
+  }, [isOpen, startGestureEngine]);
 
   if (!isOpen) return null;
 
@@ -241,9 +245,32 @@ export default function GestureControlPanel({ onGesture, isOpen, onClose }: Gest
             )}
 
             {cameraError && (
-              <div className="p-4 text-center text-xs text-rose-400 space-y-1 z-10">
-                <p className="font-semibold">Webcam Offline</p>
-                <p className="text-[10px] text-neutral-400">{cameraError}</p>
+              <div className="p-4 text-center text-xs text-rose-400 space-y-2 z-10 bg-black/85 rounded-xl border border-rose-500/20 max-w-[90%]">
+                <p className="font-semibold text-rose-300">Webcam Offline</p>
+                <p className="text-[10px] text-neutral-300 leading-tight">
+                  {cameraError.includes('denied') || cameraError.includes('NotAllowed')
+                    ? 'Camera permission was blocked. Please click the camera/lock icon in your browser address bar to Allow Camera.'
+                    : cameraError}
+                </p>
+                <div className="flex flex-col gap-1.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => startGestureEngine()}
+                    className="w-full py-1.5 px-3 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-medium transition-all"
+                  >
+                    Retry Camera Permission
+                  </button>
+                  {typeof window !== 'undefined' && window.self !== window.top && (
+                    <a
+                      href="http://localhost:3001"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-1 px-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] text-center border border-neutral-700 transition-all flex items-center justify-center gap-1"
+                    >
+                      Open Globe in New Tab ↗
+                    </a>
+                  )}
+                </div>
               </div>
             )}
 
