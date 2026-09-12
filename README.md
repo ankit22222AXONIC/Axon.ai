@@ -1,78 +1,122 @@
-# AXON & OSIRIS
+# 🧠 AXON & 🌐 OSIRIS
 
-AXON is an autonomous personal AI agent for Windows. OSIRIS is its dynamic, modern 3D globe visualization frontend built with Next.js and MapLibre.
+> **Next-Gen Autonomous AI Assistant with Interactive 3D World Intelligence** 🚀✨
 
-Together, they form a powerful local AI assistant capable of reasoning, executing local terminal commands, browsing the web, and visualizing global data in a stunning interface.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![Next.js 14+](https://img.shields.io/badge/next.js-14+-black.svg?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## Prerequisites
+**AXON** is an autonomous personal AI agent designed for Windows with real-time reasoning, terminal command execution, and file/web tools. 
+**OSIRIS** is its high-tech, futuristic 3D globe visualization frontend powered by **Next.js** and **MapLibre**.
 
-- **Python 3.10+** (For the AXON AI Backend)
-- **Node.js 18+** (For the OSIRIS Frontend)
-- **OpenRouter API Key** (For the AI Models)
+Together, they provide a seamless, sci-fi caliber experience right on your desktop! 🌌🔮
 
-## Setup & Installation
+---
 
-### 1. Clone the Repository
+## ✨ Features
+
+- 🤖 **Autonomous Agent Brain**: Powered by advanced LLMs via OpenRouter with dynamic fallback key support.
+- 💻 **Native Windows Control**: Execute terminal commands, manage running processes, and inspect files safely.
+- 🌍 **Interactive 3D Globe (OSIRIS)**: Real-time geospatial data visualization and interactive map layer exploration.
+- 💬 **Persistent Chat Sessions**: Auto-saves conversations locally with fast search and management.
+- 🔌 **Extensible Tool Registry**: Effortlessly build and plug in your own custom Python tools.
+
+---
+
+## 📋 Prerequisites
+
+Before starting, ensure you have the following installed on your system:
+
+- 🐍 **Python 3.10+** (For the AXON AI Agent Backend)
+- ⚡ **Node.js 18+** & **npm** (For the OSIRIS Frontend)
+- 🔑 **OpenRouter API Key** ([Get your free or paid key here](https://openrouter.ai/keys))
+
+---
+
+## 🚀 Setup & Installation
+
+### 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/ankit22222AXONIC/Axon.ai.git
 cd Axon.ai
 ```
 
-### 2. Configure Environment Variables
-Create a new file named `.env` in the root directory (the same folder as `axon` and `osiris`).
-You can use the provided template:
+### 2️⃣ Configure Environment Variables 🔐
+Create a `.env` file in the project root directory:
 ```bash
 cp .env.example .env
 ```
-Open `.env` and paste your OpenRouter API Key:
+Open `.env` in your favorite editor and paste your API key:
 ```env
 OPENROUTER_API_KEY=sk-or-v1-YOUR-KEY-HERE
-# (Optional) You can also add OPENROUTER_FALLBACK_API_KEY for a backup key!
+# (Optional) Add a secondary key to automatically fall back if the first runs out of credits:
+# OPENROUTER_FALLBACK_API_KEY=sk-or-v1-YOUR-BACKUP-KEY-HERE
 ```
 
-### 3. Install Python Dependencies
-The backend runs using standard Python libraries, plus a few AI and system automation packages.
-*(Note: If you have a `requirements.txt`, run `pip install -r requirements.txt`. Otherwise, ensure packages like `requests`, `pydantic`, `psutil` are installed.)*
+### 3️⃣ Install Python Dependencies 📦
+Install the required packages for AXON:
+```bash
+pip install -r requirements.txt
+```
+*(If installing manually: `pip install requests pydantic psutil`)*
 
-### 4. Install OSIRIS Frontend Dependencies
-Navigate into the OSIRIS directory and install the required Node packages:
+### 4️⃣ Install OSIRIS Frontend Dependencies 🌐
+Navigate to the `osiris` directory and install the Node packages:
 ```bash
 cd osiris
 npm install
+cd ..
 ```
 
 ---
 
-## Running the Application
+## 🎮 Running the Application
 
-To run the full suite, you need to start **both** the AXON backend and the OSIRIS frontend at the same time.
+To run the complete system, keep two terminals open:
 
-### Step 1: Start the OSIRIS Frontend (Terminal 1)
-Open a terminal, go to the `osiris` folder, and start the development server:
+### 🖥️ Terminal 1: Launch OSIRIS 3D Frontend
 ```bash
 cd osiris
 npm run dev
 ```
-*(This will start OSIRIS on `http://localhost:3000`)*
+> 📍 *Running at: `http://localhost:3000`*
 
-### Step 2: Start the AXON Backend (Terminal 2)
-Open a new terminal, go to the main `Axon.ai` folder, and start the web interface:
+### 🧠 Terminal 2: Launch AXON AI Backend
 ```bash
-# From the root directory:
+# In the root Axon.ai directory:
 python -m axon --web
 ```
-*(This will start the AXON backend on `http://localhost:5000`)*
-
-### Step 3: Access the Interface
-Open your web browser and navigate to:
-**`http://localhost:5000`**
-
-You will see the main AXON chat interface. When you trigger the globe visualization (e.g., clicking "Know the World"), the OSIRIS frontend will dynamically load inside the interface!
+> 📍 *Running at: `http://localhost:5000`*
 
 ---
 
-## Adding Custom Tools
-AXON's Brain allows you to easily register custom tools.
-1. Create your python function in `axon/tools/`
-2. Register it in `axon/core/runtime.py` using `reg.register("my.tool", my_tool, "Description")`
-3. The AI agent will automatically become aware of your new tool!
+## 🛸 Accessing the Interface
+
+1. Open your browser and go to: **[http://localhost:5000](http://localhost:5000)** 🌐
+2. Start chatting with **AXON**! 💬
+3. Click **"Know the World"** to launch the futuristic **OSIRIS 3D Globe** embedded directly into the workspace! 🛰️🗺️
+
+---
+
+## 🛠️ Adding Custom Tools
+
+AXON makes expanding agent capabilities as easy as writing a standard Python function:
+
+1. Create your tool logic inside `axon/tools/`
+2. Register it in `axon/core/runtime.py`:
+   ```python
+   reg.register(
+       name="system.my_custom_tool",
+       func=my_custom_tool,
+       description="Briefly explain what your tool does so AXON knows when to use it."
+   )
+   ```
+3. Restart AXON — your AI agent is now equipped with your custom superpower! ⚡🦸
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information. 📜
+
+Made with ❤️ by [ankit22222AXONIC](https://github.com/ankit22222AXONIC) 🌟
