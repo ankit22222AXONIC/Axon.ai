@@ -21,5 +21,15 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Dependencies
+**/node_modules/
+node_modules/
 osiris/node_modules/
+osiris/intel/node_modules/
 osiris/.next/
+.next/
+
+# Scratch & temporary
+scratch/
+osiris/scratch/
+Persisted
