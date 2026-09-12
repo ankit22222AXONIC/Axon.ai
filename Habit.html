@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasks & Habit Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            canvas: '#131314',
+            modal: '#1e1f20',
+            surface: '#282a2c',
+            'surface-hover': '#323437',
+            borderline: '#2d2f31',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #131314;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2d2f31;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f4245;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#131314] text-neutral-200 antialiased flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative">
+
+  <!-- Background App Mockup Context (Dimmed backdrop suggesting high-end productivity workspace like Linear / Gemini / Notion) -->
+  <div class="fixed inset-0 pointer-events-none opacity-25 overflow-hidden flex flex-col justify-between p-8 select-none">
+    <div class="flex items-center justify-between border-b border-[#2d2f31]/60 pb-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-7 h-7 rounded-lg bg-neutral-800 border border-neutral-700/60 flex items-center justify-center text-xs font-semibold text-neutral-300">P</div>
+        <span class="text-sm font-medium text-neutral-400">Workspace / Product Sprint Q3</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="text-xs text-neutral-500 font-mono">Press ⌘K for command palette</span>
+        <div class="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700/60"></div>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-6 my-auto">
+      <div class="h-44 rounded-xl border border-[#2d2f31]/40 bg-[#1e1f20]/50 p-4 space-y-3">
+        <div class="w-1/3 h-3 bg-neutral-800 rounded"></div>
+        <div class="w-2/3 h-2 bg-neutral-800/60 rounded"></div>
+        <div class="w-1/2 h-2 bg-neutral-800/40 rounded"></div>
+      </div>
+      <div class="h-44 rounded-xl border border-[#2d2f31]/40 bg-[#1e1f20]/50 p-4 space-y-3">
+        <div class="w-1/2 h-3 bg-neutral-800 rounded"></div>
+        <div class="w-3/4 h-2 bg-neutral-800/60 rounded"></div>
+      </div>
+      <div class="h-44 rounded-xl border border-[#2d2f31]/40 bg-[#1e1f20]/50 p-4 space-y-3">
+        <div class="w-1/4 h-3 bg-neutral-800 rounded"></div>
+        <div class="w-full h-2 bg-neutral-800/60 rounded"></div>
+      </div>
+    </div>
+    <div class="text-xs text-neutral-600">Linear Workspace • v2.4.0-prod</div>
+  </div>
+
+  <!-- Ambient Backdrop Blur Overlay -->
+  <div class="fixed inset-0 bg-[#131314]/75 backdrop-blur-[3px] transition-opacity duration-200"></div>
+
+  <!-- Centered Modal Dialog (Max-width 720px) -->
+  <div class="relative w-full max-w-[720px] bg-[#1e1f20] border border-[#2d2f31] rounded-2xl shadow-2xl shadow-black/80 flex flex-col overflow-hidden z-10 my-4 animate-in fade-in zoom-in-95 duration-200">
+
+    <!-- 1. Header Bar -->
+    <div class="px-6 pt-5 pb-4 border-b border-[#2d2f31] flex flex-col space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <!-- Icon badge -->
+          <div class="w-8 h-8 rounded-lg bg-[#282a2c] border border-[#2d2f31] flex items-center justify-center text-neutral-300 shadow-sm">
+            <svg class="w-4 h-4 text-neutral-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 11 3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-base font-semibold text-neutral-100 tracking-tight leading-snug">Tasks & Habits</h2>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-800/80 text-neutral-400 border border-neutral-700/50">Beta</span>
+            </div>
+            <p class="text-xs text-neutral-400 leading-tight">Daily routines and project tracking</p>
+          </div>
+        </div>
+
+        <!-- Close Button (X) -->
+        <button id="closeModalBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-200 hover:bg-[#282a2c] border border-transparent hover:border-[#2d2f31] transition-all duration-150 group" title="Close dialog (Esc)">
+          <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Sub-header Tabs Switcher -->
+      <div class="flex items-center justify-between pt-1">
+        <div class="inline-flex p-1 bg-[#131314]/80 rounded-xl border border-[#2d2f31]" role="tablist">
+          <button id="tabBtnHabits" onclick="switchTab('habits')" class="tab-btn active-tab px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 flex items-center space-x-2 text-neutral-100 bg-[#282a2c] border border-neutral-700/50 shadow-sm">
+            <span>Habits</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">3/5</span>
+          </button>
+          <button id="tabBtnTasks" onclick="switchTab('tasks')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-neutral-200 transition-all duration-150 flex items-center space-x-1.5 border border-transparent">
+            <span>Tasks</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-neutral-800 text-neutral-400 font-medium">4</span>
+          </button>
+          <button id="tabBtnTemplates" onclick="switchTab('templates')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-neutral-200 transition-all duration-150 flex items-center space-x-1.5 border border-transparent">
+            <span>Templates</span>
+            <span class="text-[10px] text-neutral-500 font-normal">Library</span>
+          </button>
+        </div>
+
+        <!-- Date indicator / Quick filter -->
+        <div class="hidden sm:flex items-center text-xs text-neutral-400 bg-[#282a2c]/60 border border-[#2d2f31] px-2.5 py-1 rounded-lg">
+          <svg class="w-3.5 h-3.5 mr-1.5 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span id="currentDateDisplay">Today, Wed Sep 18</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Overview Bar (Minimalist Metrics) -->
+    <div class="px-6 py-3 bg-[#18191a] border-b border-[#2d2f31] flex flex-wrap items-center justify-between gap-3 text-xs">
+      <!-- Slim horizontal progress bar -->
+      <div class="flex items-center space-x-3 flex-1 min-w-[240px]">
+        <div class="flex items-center space-x-1.5 text-neutral-400 whitespace-nowrap">
+          <span class="text-neutral-300 font-medium">Daily Progress</span>
+          <span class="text-neutral-500 font-mono text-[11px]">(3/5 completed)</span>
+        </div>
+        <div class="flex-1 max-w-xs h-1.5 bg-[#282a2c] rounded-full overflow-hidden border border-[#2d2f31]">
+          <div class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: 60%"></div>
+        </div>
+        <span class="text-emerald-400 font-mono text-[11px] font-medium">60%</span>
+      </div>
+
+      <!-- Clean Inline Metrics -->
+      <div class="flex items-center space-x-3 text-neutral-400 divide-x divide-[#2d2f31]">
+        <div class="flex items-center space-x-1.5 pl-1">
+          <span class="text-amber-400">🔥</span>
+          <span class="font-medium text-neutral-200">5 day streak</span>
+        </div>
+        <div class="flex items-center space-x-1.5 pl-3">
+          <span class="text-neutral-400">⚡</span>
+          <span class="font-medium text-neutral-200">4 pending tasks</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Content Panes -->
+    <div class="flex-1 overflow-y-auto max-h-[460px] p-6 space-y-6">
+
+      <!-- ================= 3. HABITS TAB CONTENT ================= -->
+      <section id="paneHabits" class="space-y-5">
+        <!-- Clean, minimalist input bar -->
+        <form id="newHabitForm" onsubmit="addHabit(event)" class="flex items-center space-x-2">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m9 12 2 2 4-4"></path>
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              id="habitInput"
+              placeholder="Add a new daily habit..." 
+              class="w-full pl-10 pr-4 py-2.5 text-xs bg-[#282a2c] border border-[#2d2f31] rounded-xl text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500/50 transition duration-150"
+              autocomplete="off"
+            >
+          </div>
+          <button 
+            type="submit"
+            class="px-4 py-2.5 rounded-xl bg-neutral-200 hover:bg-white text-[#131314] text-xs font-medium flex items-center space-x-1.5 transition-colors shadow-sm"
+          >
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Add</span>
+          </button>
+        </form>
+
+        <!-- Week Day Indicator Headers for the 7 Dots -->
+        <div class="flex items-center justify-between px-3 text-[11px] text-neutral-500 font-medium">
+          <span>Active Habits (5)</span>
+          <div class="flex items-center space-x-1.5 text-center pr-12">
+            <span class="w-4 text-center">M</span>
+            <span class="w-4 text-center">T</span>
+            <span class="w-4 text-center">W</span>
+            <span class="w-4 text-center">T</span>
+            <span class="w-4 text-center">F</span>
+            <span class="w-4 text-center">S</span>
+            <span class="w-4 text-center">S</span>
+          </div>
+        </div>
+
+        <!-- Habit Row Items List -->
+        <div id="habitList" class="space-y-2">
+          
+          <!-- Habit Item 1 (Completed Today) -->
+          <div class="group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <!-- Minimalist circular checkbox -->
+              <button onclick="toggleHabit(this)" class="w-5 h-5 rounded-full border border-emerald-500 bg-emerald-500/20 text-emerald-400 flex items-center justify-center transition-colors focus:outline-none shrink-0" aria-label="Toggle habit">
+                <svg class="w-3 h-3 stroke-[3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              
+              <div class="truncate">
+                <span class="text-xs font-medium text-neutral-200 block truncate group-hover:text-neutral-100">Morning Code Review</span>
+                <span class="text-[11px] text-neutral-500">Engineering routine • ~20m</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-4 shrink-0">
+              <!-- Streak indicator -->
+              <div class="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-mono">
+                <span class="text-xs">🔥</span>
+                <span>12d</span>
+              </div>
+
+              <!-- 7 mini circular dots Mon-Sun -->
+              <div class="flex items-center space-x-1.5" title="Mon - Sun completion">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500" title="Monday: Done"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500" title="Tuesday: Done"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30" title="Wednesday (Today): Done"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent" title="Thursday"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent" title="Friday"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent" title="Saturday"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent" title="Sunday"></span>
+              </div>
+
+              <!-- Hover Options (Edit / Delete) -->
+              <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                <button class="p-1 rounded text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800" title="Edit habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  </svg>
+                </button>
+                <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800" title="Delete habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Habit Item 2 (Completed Today) -->
+          <div class="group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <button onclick="toggleHabit(this)" class="w-5 h-5 rounded-full border border-emerald-500 bg-emerald-500/20 text-emerald-400 flex items-center justify-center transition-colors focus:outline-none shrink-0">
+                <svg class="w-3 h-3 stroke-[3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              
+              <div class="truncate">
+                <span class="text-xs font-medium text-neutral-200 block truncate group-hover:text-neutral-100">Read 20 mins</span>
+                <span class="text-[11px] text-neutral-500">Self improvement • Book: Designing Data-Intensive Apps</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-4 shrink-0">
+              <div class="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-mono">
+                <span class="text-xs">🔥</span>
+                <span>8d</span>
+              </div>
+
+              <div class="flex items-center space-x-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+              </div>
+
+              <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                <button class="p-1 rounded text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800" title="Edit habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  </svg>
+                </button>
+                <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800" title="Delete habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Habit Item 3 (Completed Today) -->
+          <div class="group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <button onclick="toggleHabit(this)" class="w-5 h-5 rounded-full border border-emerald-500 bg-emerald-500/20 text-emerald-400 flex items-center justify-center transition-colors focus:outline-none shrink-0">
+                <svg class="w-3 h-3 stroke-[3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              
+              <div class="truncate">
+                <span class="text-xs font-medium text-neutral-200 block truncate group-hover:text-neutral-100">System Maintenance & Logs</span>
+                <span class="text-[11px] text-neutral-500">DevOps • Check alerts & Sentry exceptions</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-4 shrink-0">
+              <div class="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-mono">
+                <span class="text-xs">🔥</span>
+                <span>5d</span>
+              </div>
+
+              <div class="flex items-center space-x-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+              </div>
+
+              <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                <button class="p-1 rounded text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800" title="Edit habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  </svg>
+                </button>
+                <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800" title="Delete habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Habit Item 4 (Pending Today) -->
+          <div class="group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <button onclick="toggleHabit(this)" class="w-5 h-5 rounded-full border border-neutral-600 hover:border-neutral-400 bg-transparent flex items-center justify-center transition-colors focus:outline-none shrink-0">
+                <svg class="w-3 h-3 stroke-[3] opacity-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              
+              <div class="truncate">
+                <span class="text-xs font-medium text-neutral-200 block truncate group-hover:text-neutral-100">Daily Exercise or Stretch</span>
+                <span class="text-[11px] text-neutral-500">Health • 30 mins mobility workout</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-4 shrink-0">
+              <div class="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-neutral-800 border border-neutral-700 text-neutral-400 text-[11px] font-mono">
+                <span class="text-xs">⚡</span>
+                <span>3d</span>
+              </div>
+
+              <div class="flex items-center space-x-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-dashed border-neutral-500 bg-transparent" title="Pending Today"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+              </div>
+
+              <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                <button class="p-1 rounded text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800" title="Edit habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  </svg>
+                </button>
+                <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800" title="Delete habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Habit Item 5 (Pending Today) -->
+          <div class="group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <button onclick="toggleHabit(this)" class="w-5 h-5 rounded-full border border-neutral-600 hover:border-neutral-400 bg-transparent flex items-center justify-center transition-colors focus:outline-none shrink-0">
+                <svg class="w-3 h-3 stroke-[3] opacity-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              
+              <div class="truncate">
+                <span class="text-xs font-medium text-neutral-200 block truncate group-hover:text-neutral-100">End-of-Day Journal & Review</span>
+                <span class="text-[11px] text-neutral-500">Mindfulness • Log wins & priorities for tomorrow</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-4 shrink-0">
+              <div class="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-mono">
+                <span class="text-xs">🔥</span>
+                <span>4d</span>
+              </div>
+
+              <div class="flex items-center space-x-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-dashed border-neutral-500 bg-transparent" title="Pending Today"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+                <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+              </div>
+
+              <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                <button class="p-1 rounded text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800" title="Edit habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  </svg>
+                </button>
+                <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800" title="Delete habit">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= 4. TASKS TAB CONTENT ================= -->
+      <section id="paneTasks" class="space-y-5 hidden">
+        <!-- Fast task entry field with inline dropdowns -->
+        <form id="newTaskForm" onsubmit="addTask(event)" class="flex flex-col sm:flex-row gap-2">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              id="taskInput"
+              placeholder="Create a new task..." 
+              class="w-full pl-10 pr-3 py-2.5 text-xs bg-[#282a2c] border border-[#2d2f31] rounded-xl text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500/50"
+              autocomplete="off"
+            >
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <!-- Priority selector -->
+            <select id="taskPriority" class="text-xs bg-[#282a2c] border border-[#2d2f31] text-neutral-300 rounded-xl px-3 py-2.5 focus:outline-none focus:border-neutral-500">
+              <option value="High">🔴 High Priority</option>
+              <option value="Medium" selected>🟡 Medium</option>
+              <option value="Low">⚪ Low</option>
+            </select>
+
+            <!-- Due Date selector -->
+            <select id="taskDueDate" class="text-xs bg-[#282a2c] border border-[#2d2f31] text-neutral-300 rounded-xl px-3 py-2.5 focus:outline-none focus:border-neutral-500">
+              <option value="Today" selected>Today</option>
+              <option value="Tomorrow">Tomorrow</option>
+              <option value="This Week">This Week</option>
+            </select>
+
+            <button type="submit" class="px-3.5 py-2.5 rounded-xl bg-neutral-200 hover:bg-white text-[#131314] text-xs font-medium transition-colors">
+              Add
+            </button>
+          </div>
+        </form>
+
+        <!-- Segmented Filter Controls -->
+        <div class="flex items-center justify-between border-b border-[#2d2f31] pb-3">
+          <div class="inline-flex p-0.5 bg-[#18191a] rounded-lg border border-[#2d2f31]">
+            <button onclick="filterTasks('all')" class="task-filter-btn px-2.5 py-1 text-[11px] font-medium rounded-md bg-[#282a2c] text-neutral-200">All (5)</button>
+            <button onclick="filterTasks('active')" class="task-filter-btn px-2.5 py-1 text-[11px] font-medium rounded-md text-neutral-400 hover:text-neutral-200">Active (4)</button>
+            <button onclick="filterTasks('completed')" class="task-filter-btn px-2.5 py-1 text-[11px] font-medium rounded-md text-neutral-400 hover:text-neutral-200">Completed (1)</button>
+          </div>
+          <span class="text-[11px] text-neutral-500 font-mono">Sorted by urgency</span>
+        </div>
+
+        <!-- Structured Task Rows -->
+        <div id="taskList" class="space-y-2">
+          
+          <!-- Task Item 1 (High Priority, Today) -->
+          <div class="task-item active-item group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <!-- Square Checkbox -->
+              <button onclick="toggleTask(this)" class="w-4 h-4 rounded border border-neutral-600 hover:border-neutral-400 bg-transparent flex items-center justify-center transition-colors focus:outline-none shrink-0" aria-label="Mark task done">
+                <svg class="w-3 h-3 stroke-[3] opacity-0 text-[#131314]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+
+              <div class="truncate">
+                <div class="flex items-center space-x-2 truncate">
+                  <span class="text-xs font-medium text-neutral-200 group-hover:text-neutral-100 truncate">Finalize Auth Token migration and test rotation</span>
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-medium bg-neutral-800 text-neutral-400 border border-neutral-700/60">Core-API</span>
+                </div>
+                <span class="text-[11px] text-neutral-500">Review edge cases with security team</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-3 shrink-0">
+              <!-- Tasteful soft red priority badge -->
+              <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-300 border border-rose-500/20">High</span>
+              
+              <!-- Due date badge -->
+              <span class="flex items-center text-[11px] text-neutral-400 bg-neutral-800/80 px-2 py-0.5 rounded border border-neutral-700/50">
+                <svg class="w-3 h-3 mr-1 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Today
+              </span>
+
+              <!-- Hover delete action -->
+              <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete task">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Task Item 2 (Medium Priority, Today) -->
+          <div class="task-item active-item group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <button onclick="toggleTask(this)" class="w-4 h-4 rounded border border-neutral-600 hover:border-neutral-400 bg-transparent flex items-center justify-center transition-colors focus:outline-none shrink-0">
+                <svg class="w-3 h-3 stroke-[3] opacity-0 text-[#131314]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+
+              <div class="truncate">
+                <div class="flex items-center space-x-2 truncate">
+                  <span class="text-xs font-medium text-neutral-200 group-hover:text-neutral-100 truncate">Implement Dark-Mode Palette tokens in Tailwind config</span>
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-medium bg-neutral-800 text-neutral-400 border border-neutral-700/60">UI-Kit</span>
+                </div>
+                <span class="text-[11px] text-neutral-500">Align hex values with Notion & Linear specs</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-3 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">Medium</span>
+              <span class="flex items-center text-[11px] text-neutral-400 bg-neutral-800/80 px-2 py-0.5 rounded border border-neutral-700/50">
+                <svg class="w-3 h-3 mr-1 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Today
+              </span>
+              <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete task">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Task Item 3 (Low Priority, Tomorrow) -->
+          <div class="task-item active-item group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <button onclick="toggleTask(this)" class="w-4 h-4 rounded border border-neutral-600 hover:border-neutral-400 bg-transparent flex items-center justify-center transition-colors focus:outline-none shrink-0">
+                <svg class="w-3 h-3 stroke-[3] opacity-0 text-[#131314]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+
+              <div class="truncate">
+                <div class="flex items-center space-x-2 truncate">
+                  <span class="text-xs font-medium text-neutral-200 group-hover:text-neutral-100 truncate">Draft sprint retro summary document</span>
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-medium bg-neutral-800 text-neutral-400 border border-neutral-700/60">Team</span>
+                </div>
+                <span class="text-[11px] text-neutral-500">Collect asynchronous feedback from devs</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-3 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-800 text-neutral-400 border border-neutral-700/60">Low</span>
+              <span class="flex items-center text-[11px] text-neutral-400 bg-neutral-800/80 px-2 py-0.5 rounded border border-neutral-700/50">Tomorrow</span>
+              <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete task">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Task Item 4 (Medium Priority, Sep 20) -->
+          <div class="task-item active-item group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <button onclick="toggleTask(this)" class="w-4 h-4 rounded border border-neutral-600 hover:border-neutral-400 bg-transparent flex items-center justify-center transition-colors focus:outline-none shrink-0">
+                <svg class="w-3 h-3 stroke-[3] opacity-0 text-[#131314]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+
+              <div class="truncate">
+                <div class="flex items-center space-x-2 truncate">
+                  <span class="text-xs font-medium text-neutral-200 group-hover:text-neutral-100 truncate">Clean up unused Tailwind CSS classes and optimize bundle</span>
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-medium bg-neutral-800 text-neutral-400 border border-neutral-700/60">Frontend</span>
+                </div>
+                <span class="text-[11px] text-neutral-500">Run PurgeCSS & verify production chunk size</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-3 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">Medium</span>
+              <span class="flex items-center text-[11px] text-neutral-400 bg-neutral-800/80 px-2 py-0.5 rounded border border-neutral-700/50">Sep 20</span>
+              <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete task">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Task Item 5 (Completed) -->
+          <div class="task-item completed-item group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/40 hover:bg-[#282a2c]/60 border border-[#2d2f31]/60 opacity-65 transition-all duration-150">
+            <div class="flex items-center space-x-3 min-w-0 pr-3">
+              <button onclick="toggleTask(this)" class="w-4 h-4 rounded border border-emerald-500 bg-emerald-500 text-[#131314] flex items-center justify-center transition-colors focus:outline-none shrink-0">
+                <svg class="w-3 h-3 stroke-[3] text-[#131314]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+
+              <div class="truncate">
+                <div class="flex items-center space-x-2 truncate">
+                  <span class="text-xs font-medium text-neutral-400 line-through truncate">Update Redis cluster credentials in production vault</span>
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-medium bg-neutral-800/50 text-neutral-500 border border-neutral-700/40">Infra</span>
+                </div>
+                <span class="text-[11px] text-neutral-500 line-through">Completed today at 09:15 AM</span>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-3 shrink-0">
+              <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-800/40 text-neutral-500 border border-neutral-700/40">Done</span>
+              <span class="text-[11px] text-neutral-500">Sep 18</span>
+              <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete task">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= 5. TEMPLATES TAB CONTENT ================= -->
+      <section id="paneTemplates" class="space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xs font-semibold text-neutral-200 uppercase tracking-wider">Curated Routine Library</h3>
+            <p class="text-xs text-neutral-400 mt-0.5">Quick setup presets based on high-performance engineering & focus habits.</p>
+          </div>
+          <span class="text-[11px] text-neutral-500">3 Presets</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          
+          <!-- Template Card 1: Developer Daily Routine -->
+          <div class="p-4 rounded-xl bg-[#282a2c]/80 border border-[#2d2f31] hover:border-neutral-600/80 transition-all flex flex-col justify-between space-y-3.5">
+            <div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-md bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-xs text-indigo-400">⚡</span>
+                  <h4 class="text-xs font-semibold text-neutral-100">Developer Daily Routine</h4>
+                </div>
+                <span class="text-[10px] text-neutral-500 font-mono">3 Items</span>
+              </div>
+              <p class="text-[11px] text-neutral-400 mt-2 leading-relaxed">
+                Structured cadence tailored for individual contributors and leads.
+              </p>
+              
+              <ul class="mt-3 space-y-1.5 text-xs text-neutral-300">
+                <li class="flex items-center space-x-2 text-[11px]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+                  <span>Standup & sync blocker review</span>
+                </li>
+                <li class="flex items-center space-x-2 text-[11px]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+                  <span>Deep work architecture block (2 hrs)</span>
+                </li>
+                <li class="flex items-center space-x-2 text-[11px]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+                  <span>Peer PR reviews & code audits</span>
+                </li>
+              </ul>
+            </div>
+
+            <button onclick="applyTemplate('dev')" class="w-full py-2 px-3 rounded-lg bg-[#1e1f20] hover:bg-neutral-800 border border-[#2d2f31] hover:border-neutral-600 text-neutral-200 text-xs font-medium flex items-center justify-center space-x-1.5 transition-all">
+              <svg class="w-3.5 h-3.5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>+ Use Template</span>
+            </button>
+          </div>
+
+          <!-- Template Card 2: Focus & Deep Work -->
+          <div class="p-4 rounded-xl bg-[#282a2c]/80 border border-[#2d2f31] hover:border-neutral-600/80 transition-all flex flex-col justify-between space-y-3.5">
+            <div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-md bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400">🎯</span>
+                  <h4 class="text-xs font-semibold text-neutral-100">Focus & Deep Work</h4>
+                </div>
+                <span class="text-[10px] text-neutral-500 font-mono">3 Items</span>
+              </div>
+              <p class="text-[11px] text-neutral-400 mt-2 leading-relaxed">
+                Minimizes task switching and maximizes flow state concentration.
+              </p>
+              
+              <ul class="mt-3 space-y-1.5 text-xs text-neutral-300">
+                <li class="flex items-center space-x-2 text-[11px]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+                  <span>Task planning & top 3 MIT selection</span>
+                </li>
+                <li class="flex items-center space-x-2 text-[11px]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+                  <span>90min sprint with notifications paused</span>
+                </li>
+                <li class="flex items-center space-x-2 text-[11px]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-neutral-600"></span>
+                  <span>EOD reflection & tomorrow's queue</span>
+                </li>
+              </ul>
+            </div>
+
+            <button onclick="applyTemplate('focus')" class="w-full py-2 px-3 rounded-lg bg-[#1e1f20] hover:bg-neutral-800 border border-[#2d2f31] hover:border-neutral-600 text-neutral-200 text-xs font-medium flex items-center justify-center space-x-1.5 transition-all">
+              <svg class="w-3.5 h-3.5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>+ Use Template</span>
+            </button>
+          </div>
+
+          <!-- Template Card 3: Health & Recovery Routine -->
+          <div class="p-4 rounded-xl bg-[#282a2c]/80 border border-[#2d2f31] hover:border-neutral-600/80 transition-all flex flex-col justify-between space-y-3.5 sm:col-span-2">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-md bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xs text-amber-400">🌿</span>
+                  <h4 class="text-xs font-semibold text-neutral-100">Physical Ergonomics & Recovery</h4>
+                  <span class="text-[10px] text-neutral-500 font-mono">Wellness</span>
+                </div>
+                <p class="text-[11px] text-neutral-400 mt-1">Hydration targets, posture check, and screen fatigue decompression.</p>
+              </div>
+
+              <button onclick="applyTemplate('health')" class="sm:w-auto py-2 px-4 rounded-lg bg-[#1e1f20] hover:bg-neutral-800 border border-[#2d2f31] hover:border-neutral-600 text-neutral-200 text-xs font-medium flex items-center justify-center space-x-1.5 transition-all shrink-0">
+                <svg class="w-3.5 h-3.5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>+ Use Template</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 6. Clean Footer -->
+    <div class="px-6 py-3.5 bg-[#18191a] border-t border-[#2d2f31] flex items-center justify-between text-xs">
+      <!-- Left: Auto-saved indicator -->
+      <div class="flex items-center space-x-2 text-neutral-400">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="text-[11px] text-neutral-400">Auto-saved locally</span>
+      </div>
+
+      <!-- Center / Right Actions -->
+      <div class="flex items-center space-x-4">
+        <button onclick="clearCompleted()" class="text-[11px] text-neutral-400 hover:text-neutral-200 hover:underline transition-colors focus:outline-none">
+          Clear Completed
+        </button>
+        <span class="text-neutral-600">•</span>
+        <span class="text-[11px] text-neutral-500">Shortcut: <kbd class="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700/60 font-mono text-[10px]">Esc</kbd></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Client-side Interactive Logic -->
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      const tabs = ['habits', 'tasks', 'templates'];
+      tabs.forEach(t => {
+        const pane = document.getElementById('pane' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        
+        if (t === tabId) {
+          pane.classList.remove('hidden');
+          btn.classList.add('text-neutral-100', 'bg-[#282a2c]', 'border-neutral-700/50', 'shadow-sm');
+          btn.classList.remove('text-neutral-400', 'border-transparent');
+        } else {
+          pane.classList.add('hidden');
+          btn.classList.remove('text-neutral-100', 'bg-[#282a2c]', 'border-neutral-700/50', 'shadow-sm');
+          btn.classList.add('text-neutral-400', 'border-transparent');
+        }
+      });
+    }
+
+    // Toggle Habit Checkbox
+    function toggleHabit(btn) {
+      const svg = btn.querySelector('svg');
+      const isCompleted = btn.classList.contains('border-emerald-500');
+      
+      if (isCompleted) {
+        btn.classList.remove('border-emerald-500', 'bg-emerald-500/20', 'text-emerald-400');
+        btn.classList.add('border-neutral-600', 'bg-transparent');
+        svg.classList.add('opacity-0');
+      } else {
+        btn.classList.remove('border-neutral-600', 'bg-transparent');
+        btn.classList.add('border-emerald-500', 'bg-emerald-500/20', 'text-emerald-400');
+        svg.classList.remove('opacity-0');
+      }
+    }
+
+    // Toggle Task Checkbox
+    function toggleTask(btn) {
+      const row = btn.closest('.task-item');
+      const svg = btn.querySelector('svg');
+      const textTitle = row.querySelector('.text-neutral-200, .line-through');
+      
+      const isDone = btn.classList.contains('bg-emerald-500');
+      if (isDone) {
+        btn.classList.remove('bg-emerald-500', 'border-emerald-500');
+        btn.classList.add('border-neutral-600', 'bg-transparent');
+        svg.classList.add('opacity-0');
+        row.classList.remove('completed-item', 'opacity-65');
+        row.classList.add('active-item');
+        if (textTitle) textTitle.classList.remove('line-through', 'text-neutral-400');
+      } else {
+        btn.classList.remove('border-neutral-600', 'bg-transparent');
+        btn.classList.add('bg-emerald-500', 'border-emerald-500');
+        svg.classList.remove('opacity-0');
+        row.classList.add('completed-item', 'opacity-65');
+        row.classList.remove('active-item');
+        if (textTitle) textTitle.classList.add('line-through', 'text-neutral-400');
+      }
+    }
+
+    // Add new Habit dynamically
+    function addHabit(e) {
+      e.preventDefault();
+      const input = document.getElementById('habitInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const list = document.getElementById('habitList');
+      const newRow = document.createElement('div');
+      newRow.className = "group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150 animate-in fade-in";
+      newRow.innerHTML = `
+        <div class="flex items-center space-x-3 min-w-0 pr-3">
+          <button onclick="toggleHabit(this)" class="w-5 h-5 rounded-full border border-neutral-600 hover:border-neutral-400 bg-transparent flex items-center justify-center transition-colors focus:outline-none shrink-0">
+            <svg class="w-3 h-3 stroke-[3] opacity-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+          <div class="truncate">
+            <span class="text-xs font-medium text-neutral-200 block truncate group-hover:text-neutral-100">${escapeHtml(val)}</span>
+            <span class="text-[11px] text-neutral-500">Custom routine • Daily</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4 shrink-0">
+          <div class="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-neutral-800 border border-neutral-700 text-neutral-400 text-[11px] font-mono">
+            <span class="text-xs">⚡</span>
+            <span>0d</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span class="w-2.5 h-2.5 rounded-full border border-dashed border-neutral-500 bg-transparent"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+            <span class="w-2.5 h-2.5 rounded-full border border-neutral-700 bg-transparent"></span>
+          </div>
+          <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button class="p-1 rounded text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800" title="Edit habit">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+              </svg>
+            </button>
+            <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800" title="Delete habit">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+      list.prepend(newRow);
+      input.value = '';
+    }
+
+    // Add new Task dynamically
+    function addTask(e) {
+      e.preventDefault();
+      const input = document.getElementById('taskInput');
+      const priority = document.getElementById('taskPriority').value;
+      const dueDate = document.getElementById('taskDueDate').value;
+      const val = input.value.trim();
+      if (!val) return;
+
+      let priorityClass = 'bg-neutral-800 text-neutral-400 border-neutral-700/60';
+      if (priority === 'High') priorityClass = 'bg-rose-500/10 text-rose-300 border-rose-500/20';
+      if (priority === 'Medium') priorityClass = 'bg-amber-500/10 text-amber-300 border-amber-500/20';
+
+      const list = document.getElementById('taskList');
+      const newRow = document.createElement('div');
+      newRow.className = "task-item active-item group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150 animate-in fade-in";
+      newRow.innerHTML = `
+        <div class="flex items-center space-x-3 min-w-0 pr-3">
+          <button onclick="toggleTask(this)" class="w-4 h-4 rounded border border-neutral-600 hover:border-neutral-400 bg-transparent flex items-center justify-center transition-colors focus:outline-none shrink-0">
+            <svg class="w-3 h-3 stroke-[3] opacity-0 text-[#131314]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+          <div class="truncate">
+            <div class="flex items-center space-x-2 truncate">
+              <span class="text-xs font-medium text-neutral-200 group-hover:text-neutral-100 truncate">${escapeHtml(val)}</span>
+              <span class="px-1.5 py-0.2 rounded text-[10px] font-medium bg-neutral-800 text-neutral-400 border border-neutral-700/60">General</span>
+            </div>
+            <span class="text-[11px] text-neutral-500">Created just now</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3 shrink-0">
+          <span class="px-2 py-0.5 rounded text-[10px] font-medium border ${priorityClass}">${priority}</span>
+          <span class="flex items-center text-[11px] text-neutral-400 bg-neutral-800/80 px-2 py-0.5 rounded border border-neutral-700/50">${dueDate}</span>
+          <button onclick="deleteRow(this)" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete task">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      `;
+      list.prepend(newRow);
+      input.value = '';
+    }
+
+    // Filter Tasks
+    function filterTasks(type) {
+      document.querySelectorAll('.task-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-[#282a2c]', 'text-neutral-200');
+        btn.classList.add('text-neutral-400');
+      });
+      event.target.classList.add('bg-[#282a2c]', 'text-neutral-200');
+      event.target.classList.remove('text-neutral-400');
+
+      const items = document.querySelectorAll('.task-item');
+      items.forEach(item => {
+        if (type === 'all') {
+          item.classList.remove('hidden');
+        } else if (type === 'active') {
+          item.classList.toggle('hidden', item.classList.contains('completed-item'));
+        } else if (type === 'completed') {
+          item.classList.toggle('hidden', !item.classList.contains('completed-item'));
+        }
+      });
+    }
+
+    // Delete row
+    function deleteRow(btn) {
+      const row = btn.closest('.group');
+      if (row) {
+        row.style.opacity = '0';
+        row.style.transform = 'scale(0.95)';
+        setTimeout(() => row.remove(), 150);
+      }
+    }
+
+    // Clear completed tasks
+    function clearCompleted() {
+      const completed = document.querySelectorAll('.task-item.completed-item');
+      completed.forEach(c => {
+        c.style.opacity = '0';
+        setTimeout(() => c.remove(), 150);
+      });
+    }
+
+    // Apply template
+    function applyTemplate(type) {
+      switchTab('habits');
+      const input = document.getElementById('habitInput');
+      if (type === 'dev') {
+        input.value = 'Deep Work Architecture Block (2 hrs)';
+      } else if (type === 'focus') {
+        input.value = '90-min Sprint w/ Notifications Off';
+      } else {
+        input.value = 'Hydration & 10-min Posture Reset';
+      }
+      input.focus();
+    }
+
+    // Helper
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+  </script>
+</body>
+</html>
