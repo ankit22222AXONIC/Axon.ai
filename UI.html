@@ -133,7 +133,7 @@
 </svg>
 <span class="">Search chats</span>
 </button>
-<button type="button" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-neutral-400 hover:text-neutral-200 hover:bg-[#282a2c]/70 text-sm transition-colors text-left cursor-pointer">
+<button type="button" onclick="window.toggleFilesAndMemory()" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-neutral-400 hover:text-neutral-200 hover:bg-[#282a2c]/70 text-sm transition-colors text-left cursor-pointer">
 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
 </svg>
@@ -547,6 +547,193 @@
         <div class="flex items-center space-x-4">
           <button onclick="window.clearCompletedTasks()" class="text-[11px] text-neutral-400 hover:text-neutral-200 hover:underline transition-colors focus:outline-none">
             Clear Completed
+          </button>
+          <span class="text-neutral-600">•</span>
+          <span class="text-[11px] text-neutral-500">Shortcut: <kbd class="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700/60 font-mono text-[10px]">Esc</kbd></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Files & Memory Modal Overlay -->
+  <div id="files-memory-modal-container" onclick="window.toggleFilesAndMemory(false)" class="opacity-0 pointer-events-none fixed inset-0 z-[150] bg-[#131314]/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 transition-all duration-200">
+    <!-- Centered Modal Dialog (Max-width 740px) -->
+    <div id="files-memory-modal-card" onclick="event.stopPropagation()" class="relative w-full max-w-[740px] bg-[#1e1f20] border border-[#2d2f31] rounded-2xl shadow-2xl shadow-black/80 flex flex-col overflow-hidden transition-all duration-200 transform scale-95 opacity-0 my-auto select-text">
+
+      <!-- 1. Header Bar -->
+      <div class="px-6 pt-5 pb-4 border-b border-[#2d2f31] flex flex-col space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <!-- Icon badge -->
+            <div class="w-8 h-8 rounded-lg bg-[#282a2c] border border-[#2d2f31] flex items-center justify-center text-neutral-300 shadow-sm">
+              <svg class="w-4 h-4 text-neutral-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h2 class="text-base font-semibold text-neutral-100 tracking-tight leading-snug">Files &amp; Agent Memory</h2>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-800/80 text-neutral-400 border border-neutral-700/50">Context Engine</span>
+              </div>
+              <p class="text-xs text-neutral-400 leading-tight">Persistent agent knowledge, custom rules &amp; workspace explorer</p>
+            </div>
+          </div>
+
+          <!-- Close Button (X) -->
+          <button id="closeFilesModalBtn" onclick="window.toggleFilesAndMemory(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-200 hover:bg-[#282a2c] border border-transparent hover:border-[#2d2f31] transition-all duration-150 group" title="Close dialog (Esc)">
+            <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Sub-header Tabs Switcher -->
+        <div class="flex items-center justify-between pt-1">
+          <div class="inline-flex p-1 bg-[#131314]/80 rounded-xl border border-[#2d2f31]" role="tablist">
+            <button id="tabBtnMemory" onclick="window.switchMemoryTab('memory')" class="tab-btn active-tab px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 flex items-center space-x-2 text-neutral-100 bg-[#282a2c] border border-neutral-700/50 shadow-sm">
+              <span>🧠 Memory &amp; Rules</span>
+              <span id="memoryRulesBadge" class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">4</span>
+            </button>
+            <button id="tabBtnFiles" onclick="window.switchMemoryTab('files')" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-neutral-200 transition-all duration-150 flex items-center space-x-1.5 border border-transparent">
+              <span>📁 Workspace Files</span>
+              <span id="workspaceFilesBadge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-neutral-800 text-neutral-400 font-medium">8</span>
+            </button>
+          </div>
+
+          <!-- Active Workspace Path Badge -->
+          <div class="hidden sm:flex items-center text-xs text-neutral-400 bg-[#282a2c]/60 border border-[#2d2f31] px-2.5 py-1 rounded-lg">
+            <svg class="w-3.5 h-3.5 mr-1.5 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="font-mono text-[11px] text-neutral-300">Axon.ai</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Overview Bar -->
+      <div class="px-6 py-3 bg-[#18191a] border-b border-[#2d2f31] flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center space-x-2 text-neutral-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-neutral-300 font-medium">Active Agent Context:</span>
+          <span class="text-neutral-400 font-mono text-[11px]">System Prompt Injection Ready</span>
+        </div>
+
+        <div class="flex items-center space-x-3 text-neutral-400 divide-x divide-[#2d2f31]">
+          <div class="flex items-center space-x-1.5 pl-1">
+            <span id="activeMemoriesCountText" class="font-medium text-neutral-200">4 Active Rules</span>
+          </div>
+          <div class="flex items-center space-x-1.5 pl-3">
+            <span class="text-neutral-400 font-mono text-[11px]">Auto-injected into queries</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Content Panes -->
+      <div class="flex-1 overflow-y-auto max-h-[460px] p-6 space-y-6">
+
+        <!-- ================= PANE: MEMORY & RULES ================= -->
+        <section id="paneMemory" class="space-y-5">
+          <!-- Add new memory rule form -->
+          <form id="newMemoryForm" onsubmit="window.addMemoryRule(event)" class="flex flex-col sm:flex-row gap-2">
+            <div class="relative flex-1">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"></path>
+                  <path d="M12 6v6l4 2"></path>
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="memoryInput"
+                placeholder="Teach AXON a rule or fact (e.g., 'Always use Windows PowerShell', 'Be concise')..." 
+                class="w-full pl-10 pr-3 py-2.5 text-xs bg-[#282a2c] border border-[#2d2f31] rounded-xl text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500/50 transition duration-150"
+                autocomplete="off"
+              >
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <select id="memoryCategory" class="text-xs bg-[#282a2c] border border-[#2d2f31] text-neutral-300 rounded-xl px-3 py-2.5 focus:outline-none focus:border-neutral-500">
+                <option value="Behavior" selected>Behavior</option>
+                <option value="Tech Stack">Tech Stack</option>
+                <option value="Persona">Persona</option>
+                <option value="Environment">Environment</option>
+              </select>
+
+              <button 
+                type="submit"
+                class="px-4 py-2.5 rounded-xl bg-neutral-200 hover:bg-white text-[#131314] text-xs font-medium flex items-center space-x-1.5 transition-colors shadow-sm shrink-0"
+              >
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Remember</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Memory Rules Header -->
+          <div class="flex items-center justify-between px-1 text-[11px] text-neutral-500 font-medium">
+            <span>Agent Long-Term Memory (Rules AXON Always Follows)</span>
+            <span id="memoryActiveRatio">4 of 4 Active</span>
+          </div>
+
+          <!-- Memory List -->
+          <div id="memoryList" class="space-y-2">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- ================= PANE: WORKSPACE FILES ================= -->
+        <section id="paneFiles" class="space-y-5 hidden">
+          <!-- File filter / search bar -->
+          <div class="flex items-center space-x-2">
+            <div class="relative flex-1">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="fileFilterInput"
+                oninput="window.filterFiles(this.value)"
+                placeholder="Search workspace files and modules..." 
+                class="w-full pl-10 pr-3 py-2.5 text-xs bg-[#282a2c] border border-[#2d2f31] rounded-xl text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-500"
+                autocomplete="off"
+              >
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between px-1 text-[11px] text-neutral-500 font-medium border-b border-[#2d2f31] pb-2">
+            <span>Project Files in Workspace</span>
+            <span class="text-neutral-500">Click to reference in Chat</span>
+          </div>
+
+          <!-- Workspace Files List -->
+          <div id="workspaceFilesList" class="space-y-2">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- 6. Clean Footer -->
+      <div class="px-6 py-3.5 bg-[#18191a] border-t border-[#2d2f31] flex items-center justify-between text-xs">
+        <div class="flex items-center space-x-2 text-neutral-400">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-[11px] text-neutral-400">Auto-saved to Agent Memory</span>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <button onclick="window.resetMemoriesToDefault()" class="text-[11px] text-neutral-400 hover:text-neutral-200 hover:underline transition-colors focus:outline-none">
+            Reset to Defaults
           </button>
           <span class="text-neutral-600">•</span>
           <span class="text-[11px] text-neutral-500">Shortcut: <kbd class="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700/60 font-mono text-[10px]">Esc</kbd></span>
@@ -1868,18 +2055,287 @@
       window.switchTasksTab('habits');
     };
 
+    // ==========================================
+    // FILES & AGENT MEMORY CONTROLLER
+    // ==========================================
+    const STORAGE_KEY_MEMORIES = 'axon_memory_rules_v1';
+
+    const DEFAULT_MEMORIES = [
+      {
+        id: "mem-1",
+        rule: "Always format shell commands for Windows PowerShell (e.g. use proper syntax and escaping).",
+        category: "Environment",
+        active: true,
+        created: "System Core"
+      },
+      {
+        id: "mem-2",
+        rule: "Project preferences: Python 3.10+ backend with Next.js frontend, styled with modern dark-mode palette.",
+        category: "Tech Stack",
+        active: true,
+        created: "Sep 12"
+      },
+      {
+        id: "mem-3",
+        rule: "Keep responses direct, professional, and code snippets clean without unnecessary fluff.",
+        category: "Persona",
+        active: true,
+        created: "Sep 12"
+      },
+      {
+        id: "mem-4",
+        rule: "OSIRIS 3D globe visualization runs on port 3001 and is accessed via the 'Know the World' dashboard.",
+        category: "Behavior",
+        active: true,
+        created: "Sep 12"
+      }
+    ];
+
+    const WORKSPACE_FILES = [
+      { name: "UI.html", path: "UI.html", type: "HTML Document", size: "102 KB", icon: "🌐" },
+      { name: "axon/main.py", path: "axon/main.py", type: "Python Module", size: "4.2 KB", icon: "🐍" },
+      { name: "axon/core/runtime.py", path: "axon/core/runtime.py", type: "Agent Core", size: "14.8 KB", icon: "🧠" },
+      { name: "axon/tools/system.py", path: "axon/tools/system.py", type: "Tool Registry", size: "8.5 KB", icon: "⚙️" },
+      { name: "osiris/src/app/page.tsx", path: "osiris/src/app/page.tsx", type: "Next.js Page", size: "12.1 KB", icon: "⚛️" },
+      { name: "Habit.html", path: "Habit.html", type: "HTML Component", size: "64 KB", icon: "📋" },
+      { name: "README.md", path: "README.md", type: "Documentation", size: "3.8 KB", icon: "📄" },
+      { name: ".env.example", path: ".env.example", type: "Configuration", size: "0.2 KB", icon: "🔐" }
+    ];
+
+    let userMemories = [];
+
+    function loadMemories() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_MEMORIES);
+        userMemories = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_MEMORIES));
+      } catch (e) {
+        userMemories = JSON.parse(JSON.stringify(DEFAULT_MEMORIES));
+      }
+    }
+
+    function saveMemories() {
+      try {
+        localStorage.setItem(STORAGE_KEY_MEMORIES, JSON.stringify(userMemories));
+      } catch (e) {}
+      renderMemories();
+    }
+
+    function renderMemories() {
+      const listEl = document.getElementById('memoryList');
+      if (!listEl) return;
+
+      const total = userMemories.length;
+      const activeCount = userMemories.filter(m => m.active).length;
+
+      const badge = document.getElementById('memoryRulesBadge');
+      if (badge) badge.textContent = activeCount;
+
+      const countText = document.getElementById('activeMemoriesCountText');
+      if (countText) countText.textContent = `${activeCount} Active Rules`;
+
+      const ratioText = document.getElementById('memoryActiveRatio');
+      if (ratioText) ratioText.textContent = `${activeCount} of ${total} Active`;
+
+      listEl.innerHTML = '';
+      if (userMemories.length === 0) {
+        listEl.innerHTML = `
+          <div class="py-8 text-center text-xs text-neutral-500 border border-dashed border-[#2d2f31] rounded-xl">
+            No custom memories yet. Teach AXON a rule above!
+          </div>`;
+        return;
+      }
+
+      userMemories.forEach(mem => {
+        const row = document.createElement('div');
+        row.className = `group flex items-start justify-between px-3.5 py-3 rounded-xl border border-[#2d2f31] transition-all duration-150 ${mem.active ? 'bg-[#282a2c]/80 hover:bg-[#282a2c]' : 'bg-[#282a2c]/35 opacity-60'}`;
+
+        let catBadge = 'bg-neutral-800 text-neutral-400 border-neutral-700/60';
+        if (mem.category === 'Behavior') catBadge = 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30';
+        if (mem.category === 'Tech Stack') catBadge = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+        if (mem.category === 'Persona') catBadge = 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+        if (mem.category === 'Environment') catBadge = 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+
+        row.innerHTML = `
+          <div class="flex items-start space-x-3 min-w-0 pr-3">
+            <button onclick="window.toggleMemoryRule('${mem.id}')" class="mt-0.5 w-4 h-4 rounded flex items-center justify-center transition-colors focus:outline-none shrink-0 ${mem.active ? 'bg-emerald-500 text-[#131314]' : 'border border-neutral-600 bg-transparent'}" title="${mem.active ? 'Disable rule' : 'Enable rule'}">
+              ${mem.active ? '<svg class="w-3 h-3 stroke-[3]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+            </button>
+
+            <div class="truncate">
+              <div class="flex items-center space-x-2">
+                <span class="px-1.5 py-0.2 rounded text-[10px] font-medium border ${catBadge}">${escapeHtml(mem.category || 'Rule')}</span>
+                <span class="text-[11px] text-neutral-500 font-mono">${escapeHtml(mem.created || 'Custom')}</span>
+              </div>
+              <p class="text-xs font-medium text-neutral-200 mt-1 leading-relaxed ${mem.active ? '' : 'line-through text-neutral-400'}">${escapeHtml(mem.rule)}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 shrink-0 pt-0.5">
+            <button onclick="window.deleteMemoryRule('${mem.id}')" class="p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete memory">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+
+    function renderWorkspaceFiles(filterQuery) {
+      const listEl = document.getElementById('workspaceFilesList');
+      if (!listEl) return;
+
+      const q = (filterQuery || '').trim().toLowerCase();
+      const filtered = q ? WORKSPACE_FILES.filter(f => f.name.toLowerCase().includes(q) || f.type.toLowerCase().includes(q)) : WORKSPACE_FILES;
+
+      const badge = document.getElementById('workspaceFilesBadge');
+      if (badge) badge.textContent = WORKSPACE_FILES.length;
+
+      listEl.innerHTML = '';
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div class="py-8 text-center text-xs text-neutral-500 border border-dashed border-[#2d2f31] rounded-xl">
+            No matching files found.
+          </div>`;
+        return;
+      }
+
+      filtered.forEach(file => {
+        const row = document.createElement('div');
+        row.className = "group flex items-center justify-between px-3.5 py-3 rounded-xl bg-[#282a2c]/80 hover:bg-[#282a2c] border border-[#2d2f31] transition-all duration-150";
+
+        row.innerHTML = `
+          <div class="flex items-center space-x-3 min-w-0 pr-3">
+            <span class="text-base shrink-0">${file.icon || '📄'}</span>
+            <div class="truncate">
+              <span class="text-xs font-medium text-neutral-200 block truncate group-hover:text-neutral-100 font-mono">${escapeHtml(file.name)}</span>
+              <span class="text-[11px] text-neutral-500">${escapeHtml(file.type)} • ${escapeHtml(file.size)}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 shrink-0">
+            <button onclick="window.insertFileReference('${file.path}')" class="px-2.5 py-1 rounded-lg bg-[#1e1f20] hover:bg-neutral-800 border border-[#2d2f31] hover:border-neutral-600 text-neutral-300 hover:text-white text-[11px] font-medium flex items-center space-x-1 transition-all" title="Reference in chat">
+              <svg class="w-3 h-3 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+              <span>Reference</span>
+            </button>
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+
+    window.toggleFilesAndMemory = function(forceState) {
+      const modal = document.getElementById('files-memory-modal-container');
+      const card = document.getElementById('files-memory-modal-card');
+      if (!modal || !card) return;
+
+      const isOpening = (typeof forceState === 'boolean') ? forceState : modal.classList.contains('opacity-0');
+      if (isOpening) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+        renderMemories();
+        renderWorkspaceFiles();
+      } else {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.classList.remove('opacity-100');
+        card.classList.add('scale-95', 'opacity-0');
+        card.classList.remove('scale-100', 'opacity-100');
+      }
+    };
+
+    window.switchMemoryTab = function(tabId) {
+      const tabs = ['memory', 'files'];
+      tabs.forEach(t => {
+        const pane = document.getElementById('pane' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (!pane || !btn) return;
+        
+        if (t === tabId) {
+          pane.classList.remove('hidden');
+          btn.classList.add('text-neutral-100', 'bg-[#282a2c]', 'border-neutral-700/50', 'shadow-sm');
+          btn.classList.remove('text-neutral-400', 'border-transparent');
+        } else {
+          pane.classList.add('hidden');
+          btn.classList.remove('text-neutral-100', 'bg-[#282a2c]', 'border-neutral-700/50', 'shadow-sm');
+          btn.classList.add('text-neutral-400', 'border-transparent');
+        }
+      });
+    };
+
+    window.addMemoryRule = function(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('memoryInput');
+      const category = document.getElementById('memoryCategory')?.value || 'Behavior';
+      if (!input) return;
+      const ruleText = input.value.trim();
+      if (!ruleText) return;
+
+      userMemories.unshift({
+        id: 'mem-' + Date.now(),
+        rule: ruleText,
+        category: category,
+        active: true,
+        created: 'Custom'
+      });
+
+      input.value = '';
+      saveMemories();
+    };
+
+    window.toggleMemoryRule = function(id) {
+      const mem = userMemories.find(m => m.id === id);
+      if (!mem) return;
+      mem.active = !mem.active;
+      saveMemories();
+    };
+
+    window.deleteMemoryRule = function(id) {
+      userMemories = userMemories.filter(m => m.id !== id);
+      saveMemories();
+    };
+
+    window.resetMemoriesToDefault = function() {
+      userMemories = JSON.parse(JSON.stringify(DEFAULT_MEMORIES));
+      saveMemories();
+    };
+
+    window.filterFiles = function(val) {
+      renderWorkspaceFiles(val);
+    };
+
+    window.insertFileReference = function(filePath) {
+      const input = document.getElementById('user-input');
+      if (input) {
+        const current = input.value.trim();
+        input.value = current ? `${current} @[${filePath}] ` : `@[${filePath}] `;
+        input.focus();
+      }
+      window.toggleFilesAndMemory(false);
+    };
+
     // Close on Escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
-        const modal = document.getElementById('tasks-modal-container');
-        if (modal && !modal.classList.contains('opacity-0')) {
+        const tasksModal = document.getElementById('tasks-modal-container');
+        if (tasksModal && !tasksModal.classList.contains('opacity-0')) {
           window.toggleTasksAndLibrary(false);
+        }
+        const filesModal = document.getElementById('files-memory-modal-container');
+        if (filesModal && !filesModal.classList.contains('opacity-0')) {
+          window.toggleFilesAndMemory(false);
         }
       }
     });
 
-    // Initialize Tasks & Habits
+    // Initialize Tasks & Habits & Memories
     loadHabitsAndTasks();
+    loadMemories();
     updateDateIndicator();
 
     // Initialize
