@@ -1,0 +1,1014 @@
+<!DOCTYPE html><html class="dark h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>AXON - Intelligent AI Workspace</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            gemini: {
+              bg: '#131314',
+              sidebar: '#1e1f20',
+              sidebarHover: '#282a2c',
+              card: '#1e1f20',
+              input: '#282a2c',
+              blue: '#1a73e8',
+              accent: '#8ab4f8',
+              glow: '#1f2b3e',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style data-purpose="custom-glow">
+    /* Subtle Gemini-like ambient background illumination */
+    .hero-radial-gradient {
+      background: radial-gradient(circle 500px at 50% 55%, rgba(45, 78, 140, 0.18), rgba(28, 43, 76, 0.08) 45%, transparent 70%);
+    }
+    
+    /* Custom refined scrollbar for dark UI */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #333538;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #484b4f;
+    }
+
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined' !important;
+      font-weight: normal;
+      font-style: normal;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+
+    @keyframes dot-bounce {
+      0%, 80%, 100% {
+        transform: translateY(0);
+        opacity: 0.35;
+      }
+      40% {
+        transform: translateY(-4px);
+        opacity: 1;
+      }
+    }
+    .typing-dots .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: #fbbf24;
+      display: inline-block;
+      animation: dot-bounce 1.3s infinite ease-in-out both;
+    }
+    .typing-dots .dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots .dot:nth-child(2) { animation-delay: -0.16s; }
+    .typing-dots .dot:nth-child(3) { animation-delay: 0s; }
+
+    ::selection {
+      background-color: rgba(245, 158, 11, 0.35);
+      color: #ffffff;
+    }
+    .select-text, .msg-bubble, pre, code {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+    .sidebar-transition {
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#131314] text-[#e3e3e3] font-sans antialiased overflow-hidden select-none">
+<!-- BEGIN: MainContainer -->
+<div class="flex h-full w-full">
+<!-- BEGIN: LeftSidebar -->
+<aside id="main-sidebar" class="w-64 md:w-72 bg-[#1e1f20] flex flex-col justify-between border-r border-[#2d2f31]/60 z-20 shrink-0 sidebar-transition relative" data-purpose="sidebar-navigation">
+<!-- Top Section: Brand & Primary Controls -->
+<div class="flex flex-col pt-3 px-3">
+<!-- Logo & Collapse Toggle -->
+<div class="flex items-center px-3 py-2.5 mb-2">
+<div class="flex items-center gap-2.5 cursor-pointer" onclick="window.createNewConversation()">
+  <img src="AxonicA.jpeg" alt="Axonic" class="w-10 h-10 object-contain shrink-0" style="mix-blend-mode: screen;">
+  <span class="text-base font-semibold tracking-wider text-[#f5f5f5]">Axonic</span>
+</div>
+</div>
+<!-- + New Chat Pill Button (Gemini-styled) -->
+<button id="btn-new-chat" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-full bg-[#282a2c] hover:bg-[#313336] text-neutral-200 text-sm font-medium transition-all shadow-sm border border-white/5 group cursor-pointer">
+<svg class="w-4 h-4 text-neutral-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
+<span class="">New chat</span>
+</button>
+<!-- Utility Navigation Items -->
+<div class="mt-4 space-y-0.5">
+<button type="button" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-neutral-400 hover:text-neutral-200 hover:bg-[#282a2c]/70 text-sm transition-colors text-left cursor-pointer">
+<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="">Search chats</span>
+</button>
+<button type="button" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-neutral-400 hover:text-neutral-200 hover:bg-[#282a2c]/70 text-sm transition-colors text-left cursor-pointer">
+<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="">Files &amp; Memory</span>
+</button>
+<button type="button" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-neutral-400 hover:text-neutral-200 hover:bg-[#282a2c]/70 text-sm transition-colors text-left cursor-pointer">
+<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="">Tasks &amp; Library</span>
+</button>
+<button type="button" onclick="window.toggleKnowTheWorld()" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-amber-400 hover:text-amber-300 hover:bg-[#282a2c]/70 text-sm transition-colors text-left cursor-pointer mt-2">
+<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="font-medium">Know the World</span>
+</button>
+</div>
+</div>
+<!-- Center Section: Chat History (Scrollable) -->
+<div class="flex-1 overflow-y-auto px-3 mt-4 space-y-4 text-xs font-medium text-neutral-400" id="conversations-container">
+<!-- Pinned / Active Session Section -->
+<div id="pinned-section">
+<div id="toggle-pinned-btn" class="flex items-center justify-between px-3 py-1 text-neutral-500 uppercase tracking-wider text-[11px] font-semibold cursor-pointer hover:text-neutral-300 select-none">
+<span class="">Pinned</span>
+<svg id="pinned-chevron" class="w-3.5 h-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div id="pinned-list" class="mt-1 space-y-0.5">
+<!-- Dynamically populated -->
+</div>
+</div>
+<!-- Recents Section -->
+<div id="recents-section">
+<span class="block px-3 py-1 text-neutral-500 uppercase tracking-wider text-[11px] font-semibold">Recents</span>
+<div id="recents-list" class="mt-1 space-y-0.5 text-neutral-300 text-sm font-normal">
+<!-- Dynamically populated -->
+</div>
+</div>
+</div>
+<!-- Bottom Profile & Preferences Area -->
+<div class="p-3 border-t border-[#2d2f31]/60" data-purpose="user-profile-footer">
+<div class="flex items-center justify-between px-2 py-1.5 rounded-xl hover:bg-[#282a2c]/60 transition-colors">
+<div class="flex items-center gap-2.5 overflow-hidden">
+<!-- User Avatar Circle with Initial -->
+<div class="w-8 h-8 rounded-full bg-[#262420] border border-amber-400/30 flex items-center justify-center overflow-hidden shrink-0 shadow-sm shadow-amber-500/10">
+  <img src="AxonicA.jpeg" alt="Axonic User" class="w-7 h-7 object-contain" style="mix-blend-mode: screen; filter: drop-shadow(rgba(245, 158, 11, 0.4) 0px 0px 5px);">
+</div>
+<div class="flex flex-col truncate">
+<span class="text-xs font-medium text-neutral-200 truncate">Ankit Kumar</span>
+<span class="text-[10px] text-neutral-400">Pro Developer</span>
+</div>
+</div>
+<button class="p-1.5 text-neutral-400 hover:text-neutral-200 rounded-lg hover:bg-[#313336] transition-colors cursor-pointer" title="Settings">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</aside>
+<main id="main-content" class="flex-1 flex flex-col h-full relative overflow-hidden bg-black transition-colors duration-700" data-purpose="workspace-center">
+  <!-- Radiant Ambient Golden Light Glow Layer (Fades to pure black when chatting) -->
+  <div id="golden-glow-bg" class="absolute inset-0 pointer-events-none transition-opacity duration-700 ease-out z-0 opacity-100" style="background: radial-gradient(ellipse 800px 600px at 50% 38%, rgba(251, 191, 36, 0.45) 0%, rgba(245, 158, 11, 0.38) 28%, rgba(217, 119, 6, 0.25) 55%, rgba(18, 17, 16, 0.96) 80%), #121110;">
+    <!-- Radiant Ambient Golden Light Bloom -->
+    <div class="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full bg-gradient-to-tr from-amber-500/40 via-yellow-300/35 to-amber-600/40 blur-[95px]"></div>
+  </div>
+
+  <!-- OSIRIS Iframe Container -->
+  <div id="osiris-container" class="opacity-0 pointer-events-none translate-y-4 fixed inset-0 z-[100] bg-[#131314] flex flex-col transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]">
+    <button onclick="window.toggleKnowTheWorld()" class="absolute top-6 left-6 z-[200] font-bold text-amber-400 hover:text-amber-300 drop-shadow-[0_0_15px_rgba(245,158,11,0.6)] tracking-[0.2em] text-sm md:text-base transition-all hover:scale-105 uppercase flex items-center gap-2 bg-[#1e1f20]/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-amber-400/30 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+      BACK TO AXONIC
+    </button>
+    <iframe id="osiris-iframe" src="about:blank" data-src="http://localhost:3001" class="w-full flex-1 border-0 bg-[#131314]"></iframe>
+  </div>
+
+
+<!-- Chat Stream Container (Visible when there are messages) -->
+<div id="chat-stream" class="hidden flex-1 overflow-y-auto px-4 md:px-8 py-4 flex flex-col gap-6 relative z-10">
+  <!-- Active Working / Thinking Indicator -->
+  <div class="hidden items-center gap-3 w-full max-w-3xl mx-auto py-2" id="working-indicator">
+    <img src="AxonicA.jpeg" alt="Thinking" class="w-6 h-6 object-contain animate-pulse" style="mix-blend-mode: screen;">
+    <div class="flex items-center gap-2 text-sm text-neutral-400">
+      <span id="working-text">Thinking</span>
+      <span class="typing-dots inline-flex items-center gap-1">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Center Hero & Welcome Interaction Canvas (Visible in new/empty chat) -->
+<div id="welcome-block" class="flex-1 flex flex-col justify-center items-center px-4 max-w-4xl mx-auto w-full -mt-8 relative z-10">
+  <!-- Axon Badge & Expressive Welcome -->
+  <div class="text-center flex flex-col items-center animate-fade-in mb-6 relative">
+    <h1 class="text-3xl md:text-4xl font-normal tracking-tight text-[#e3e3e3] mb-2 font-sans">
+      What can I help you explore today?
+    </h1>
+    <p class="text-sm text-neutral-400">
+      Axonic intelligence ready across code, memory, and automated workflows.
+    </p>
+  </div>
+</div>
+
+<!-- Floating Chat Input Container (Signature Gemini 3D-styled pill card) -->
+<div id="input-container-wrapper" class="w-full px-4 pb-4 pt-1 shrink-0 z-20 transition-all duration-300">
+  <div class="w-full max-w-3xl mx-auto relative" data-purpose="chat-input-container">
+    <!-- Subtle ambient halo mimicking Gemini's soft pill aura -->
+    <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-amber-500/10 via-amber-400/20 to-amber-600/10 blur-xl -z-10 pointer-events-none opacity-60" style="background: radial-gradient(rgba(245, 158, 11, 0.35) 0%, rgba(217, 119, 6, 0.2) 60%, transparent 80%);" data-stitch-orig-opacity="0.85"></div>
+    
+    <!-- Pill Input Surface matching Gemini -->
+    <div class="w-full bg-[#1e1f20]/90 backdrop-blur-xl rounded-full border border-white/10 hover:border-amber-400/30 focus-within:border-amber-400/50 focus-within:shadow-[0_0_25px_rgba(245,158,11,0.18)] transition-all flex items-center px-4 py-2.5 gap-3 shadow-lg shadow-black/40">
+      <!-- Left: Plus / Action Button -->
+      <button type="button" class="p-2 text-neutral-400 hover:text-white rounded-full hover:bg-[#282a2c] transition-colors shrink-0 cursor-pointer" title="Add attachment or tool">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M12 5v14m7-7H5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+        </svg>
+      </button>
+
+      <!-- Middle: Input Text Field -->
+      <div class="flex-1 flex items-center min-w-0">
+        <input id="chat-input" type="text" class="w-full bg-transparent border-0 text-[#f5f5f5] placeholder-neutral-400 focus:ring-0 text-[15px] outline-none p-0 tracking-wide" placeholder="Ask Axonic...">
+      </div>
+
+      <!-- Right: Model Pill, Mic, and Submit Button -->
+      <div class="flex items-center gap-2 shrink-0">
+
+
+        <!-- Mic Button -->
+        <button type="button" class="p-2 text-neutral-400 hover:text-white rounded-full hover:bg-[#282a2c] transition-colors cursor-pointer" title="Use microphone">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </button>
+
+        <!-- Submit Button -->
+        <button id="send-button" type="button" class="w-8 h-8 rounded-full bg-amber-400 hover:bg-amber-300 text-neutral-950 flex items-center justify-center transition-transform active:scale-95 shadow-md shadow-amber-500/20 cursor-pointer" title="Submit prompt">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M5 10l7-7m0 0l7 7m-7-7v18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Workspace Disclaimer Note -->
+<footer class="py-2.5 text-center text-[11px] text-neutral-500 border-t border-white/5 shrink-0 bg-[#131314]/80 select-none">
+  AXON can make mistakes. Verify critical code, paths, and sensitive repository operations.
+</footer>
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- END: MainContainer -->
+
+<!-- ==================== JAVASCRIPT LOGIC ==================== -->
+<script>
+  const API_BASE = '';
+  
+  (function initAxonApp() {
+    const textarea = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-button');
+    const stream = document.getElementById('chat-stream');
+    const welcomeBlock = document.getElementById('welcome-block');
+    const workingIndicator = document.getElementById('working-indicator');
+    const workingText = document.getElementById('working-text');
+    const newChatBtn = document.getElementById('btn-new-chat');
+    const togglePinnedBtn = document.getElementById('toggle-pinned-btn');
+    const pinnedChevron = document.getElementById('pinned-chevron');
+    const pinnedListEl = document.getElementById('pinned-list');
+    const recentsListEl = document.getElementById('recents-list');
+    const goldenGlowBg = document.getElementById('golden-glow-bg');
+    const osirisContainer = document.getElementById('osiris-container');
+    const osirisIframe = document.getElementById('osiris-iframe');
+
+    window.toggleKnowTheWorld = function() {
+      if (osirisContainer.classList.contains('opacity-0')) {
+        osirisContainer.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+        osirisContainer.classList.add('opacity-100', 'translate-y-0');
+        if (osirisIframe.src === 'about:blank' || osirisIframe.src === window.location.href) {
+          osirisIframe.src = osirisIframe.getAttribute('data-src');
+        }
+      } else {
+        osirisContainer.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        osirisContainer.classList.remove('opacity-100', 'translate-y-0');
+      }
+    };
+
+    function updateBackgroundGlow(show) {
+      if (!goldenGlowBg) return;
+      if (show) {
+        goldenGlowBg.classList.remove('opacity-0');
+        goldenGlowBg.classList.add('opacity-100');
+      } else {
+        goldenGlowBg.classList.remove('opacity-100');
+        goldenGlowBg.classList.add('opacity-0');
+      }
+    }
+
+    const DEFAULT_SEED_CONVERSATIONS = [
+      {
+        id: "conv-1",
+        title: "Axonic Workspace Setup",
+        pinned: true,
+        updated_at: Date.now() - 30000,
+        messages: [
+          { role: "user", content: "Set up the Axonic workspace with tools and memory." },
+          { role: "assistant", content: "Axonic workspace is configured with full tool registry, persistent memory, and security gatekeeping." }
+        ]
+      },
+      {
+        id: "conv-2",
+        title: "Logo Animation Professional Ideas",
+        pinned: false,
+        updated_at: Date.now() - 60000,
+        messages: [
+          { role: "user", content: "Give me professional ideas for animating the AxonicA logo." },
+          { role: "assistant", content: "Here are 3 standout logo animation directions:\n\n1. **Orbital Glow**: Kinetic energy paths revolving around the central star glyph.\n2. **Neumorphic Liquid Fill**: Smooth amber gradient sweeping into the A contours.\n3. **3D Kinetic Spin**: Isometric rotation with subtle metallic highlights." }
+        ]
+      },
+      {
+        id: "conv-3",
+        title: "Logo Transparent Background Removal",
+        pinned: false,
+        updated_at: Date.now() - 120000,
+        messages: []
+      },
+      {
+        id: "conv-4",
+        title: "Changing Yahoo to Google Search",
+        pinned: false,
+        updated_at: Date.now() - 180000,
+        messages: []
+      },
+      {
+        id: "conv-5",
+        title: "Movie Identification: Napoleon (2023)",
+        pinned: false,
+        updated_at: Date.now() - 240000,
+        messages: []
+      },
+      {
+        id: "conv-6",
+        title: "Fixing Realtek Audio Driver Error",
+        pinned: false,
+        updated_at: Date.now() - 300000,
+        messages: []
+      },
+      {
+        id: "conv-7",
+        title: "CCR Authentication Token Error",
+        pinned: false,
+        updated_at: Date.now() - 360000,
+        messages: []
+      },
+      {
+        id: "conv-8",
+        title: "Vibe Coding a Parlour Website",
+        pinned: false,
+        updated_at: Date.now() - 420000,
+        messages: []
+      }
+    ];
+
+    let conversations = [];
+    let activeConvId = 'conv-new';
+    let pinnedCollapsed = false;
+
+    function saveLocal() {
+      // Backend is now the source of truth
+    }
+
+    function loadLocal() {
+      fetch(API_BASE + '/api/conversations')
+        .then(res => res.json())
+        .then(data => {
+          conversations = data.conversations || [];
+          if (!activeConvId || activeConvId === 'conv-new') {
+             activeConvId = 'conv-new';
+          } else if (data.active_id && !conversations.some(c => c.id === activeConvId)) {
+             activeConvId = data.active_id;
+          }
+          renderConversationsList();
+          loadActiveConversationMessages();
+        })
+        .catch(e => console.error(e));
+    }
+
+    function renderConversationsList() {
+      if (!pinnedListEl || !recentsListEl) return;
+
+      const pinnedItems = conversations.filter(c => c.pinned);
+      const recentsItems = conversations.filter(c => !c.pinned);
+
+      pinnedListEl.style.display = pinnedCollapsed ? 'none' : 'block';
+      if (pinnedChevron) {
+        pinnedChevron.style.transform = pinnedCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+      }
+
+      // Pinned render
+      if (pinnedItems.length === 0) {
+        pinnedListEl.innerHTML = `<div class="px-3 py-1 text-neutral-500 text-xs opacity-60 select-none">No pinned chats</div>`;
+      } else {
+        pinnedListEl.innerHTML = pinnedItems.map(c => {
+          const isActive = c.id === activeConvId;
+          const bgClass = isActive ? 'bg-[#282a2c] text-white' : 'text-neutral-300 hover:bg-[#282a2c]/60 hover:text-white';
+          return `
+            <div class="group relative flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors ${bgClass}" onclick="window.selectConversation('${c.id}')" title="${escapeHtml(c.title)}">
+              <div class="flex items-center gap-2.5 truncate min-w-0">
+                <svg class="w-4 h-4 text-neutral-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
+                <span class="text-sm truncate select-none">${escapeHtml(c.title)}</span>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+                <button class="w-5 h-5 flex items-center justify-center rounded hover:bg-[#313336] text-neutral-400 hover:text-white" onclick="event.stopPropagation(); window.togglePinConversation('${c.id}')" title="Unpin">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 12H6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                </button>
+                <button class="w-5 h-5 flex items-center justify-center rounded hover:bg-[#313336] text-neutral-400 hover:text-rose-400" onclick="event.stopPropagation(); window.deleteConversation('${c.id}')" title="Delete">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Recents render
+      if (recentsItems.length === 0) {
+        recentsListEl.innerHTML = `<div class="px-3 py-1 text-neutral-500 text-xs opacity-60 select-none">No recent chats</div>`;
+      } else {
+        recentsListEl.innerHTML = recentsItems.map(c => {
+          const isActive = c.id === activeConvId;
+          const bgClass = isActive ? 'bg-[#282a2c] text-white font-medium' : 'hover:bg-[#282a2c]/60 hover:text-white';
+          return `
+            <div class="group relative flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors ${bgClass}" onclick="window.selectConversation('${c.id}')" title="${escapeHtml(c.title)}">
+              <span class="truncate text-sm select-none flex-1">${escapeHtml(c.title)}</span>
+              <div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+                <button class="w-5 h-5 flex items-center justify-center rounded hover:bg-[#313336] text-neutral-400 hover:text-white" onclick="event.stopPropagation(); window.togglePinConversation('${c.id}')" title="Pin">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                </button>
+                <button class="w-5 h-5 flex items-center justify-center rounded hover:bg-[#313336] text-neutral-400 hover:text-rose-400" onclick="event.stopPropagation(); window.deleteConversation('${c.id}')" title="Delete">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function loadActiveConversationMessages() {
+      const existingRows = stream.querySelectorAll('.chat-msg-row');
+      existingRows.forEach(r => r.remove());
+
+      if (activeConvId === 'conv-new') {
+        welcomeBlock.classList.remove('hidden');
+        welcomeBlock.classList.add('flex');
+        stream.classList.add('hidden');
+        stream.classList.remove('flex');
+        if (textarea) textarea.value = '';
+        updateBackgroundGlow(true);
+        return;
+      }
+
+      const conv = conversations.find(c => c.id === activeConvId);
+      if (!conv || !conv.messages || conv.messages.length === 0) {
+        welcomeBlock.classList.remove('hidden');
+        welcomeBlock.classList.add('flex');
+        stream.classList.add('hidden');
+        stream.classList.remove('flex');
+        updateBackgroundGlow(true);
+      } else {
+        welcomeBlock.classList.add('hidden');
+        welcomeBlock.classList.remove('flex');
+        stream.classList.remove('hidden');
+        stream.classList.add('flex');
+        updateBackgroundGlow(false);
+        conv.messages.forEach(msg => {
+          if (msg.role === 'user') {
+            appendUserMessage(msg.content, msg.timestamp, false);
+          } else {
+            appendAxonResponse(msg.content, msg.tools || [], msg.timestamp, false);
+          }
+        });
+        scrollToBottom();
+      }
+    }
+
+    window.selectConversation = function(id) {
+      if (id === activeConvId) return;
+      activeConvId = id;
+      renderConversationsList();
+      loadActiveConversationMessages();
+      saveLocal();
+
+      fetch(API_BASE + '/api/conversations/active', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+      }).catch(() => {});
+    };
+
+    window.togglePinConversation = function(id) {
+      const conv = conversations.find(c => c.id === id);
+      if (!conv) return;
+      conv.pinned = !conv.pinned;
+      conv.updated_at = Date.now();
+      renderConversationsList();
+      saveLocal();
+
+      fetch(API_BASE + '/api/conversations/' + encodeURIComponent(id) + '/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pinned: conv.pinned })
+      }).catch(() => {});
+    };
+
+    window.deleteConversation = function(id) {
+      const idx = conversations.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      conversations.splice(idx, 1);
+      if (activeConvId === id) {
+        window.createNewConversation();
+      } else {
+        renderConversationsList();
+      }
+
+      fetch(API_BASE + '/api/conversations/' + encodeURIComponent(id) + '/delete', {
+        method: 'POST'
+      }).then(() => loadLocal()).catch(() => {});
+    };
+
+    window.createNewConversation = function() {
+      activeConvId = 'conv-new';
+      renderConversationsList();
+      loadActiveConversationMessages();
+      saveLocal();
+      textarea.value = '';
+      textarea.focus();
+    };
+
+    if (newChatBtn) newChatBtn.addEventListener('click', window.createNewConversation);
+
+    if (togglePinnedBtn) {
+      togglePinnedBtn.addEventListener('click', () => {
+        pinnedCollapsed = !pinnedCollapsed;
+        renderConversationsList();
+      });
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        window.createNewConversation();
+      }
+    });
+
+    function getTimeStamp() {
+      const now = new Date();
+      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function scrollToBottom() {
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderMarkdown(text) {
+      if (!text) return '';
+      let out = escapeHtml(text);
+
+      // Code blocks: ```...```
+      out = out.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+        const cleanCode = code.trim();
+        return `
+          <div class="relative group/code my-3 rounded-xl overflow-hidden border border-white/10 bg-[#1e1f20]">
+            <div class="flex items-center justify-between px-3 py-1.5 bg-[#282a2c] border-b border-white/5 text-[11px] font-mono text-neutral-400 select-none">
+              <span class="font-medium text-amber-400/90">${lang || 'code'}</span>
+              <button type="button" class="copy-code-btn flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-neutral-400 px-2 py-0.5 rounded hover:bg-[#313336]" title="Copy code">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                <span class="copy-label text-[11px]">Copy</span>
+              </button>
+            </div>
+            <pre class="p-3 font-mono text-[13px] text-[#e3e3e3] overflow-x-auto select-text cursor-text m-0"><code class="select-text">${cleanCode}</code></pre>
+          </div>
+        `;
+      });
+
+      // Inline code: `code`
+      out = out.replace(/`([^`]+)`/g, '<code class="bg-[#282a2c] px-1.5 py-0.5 rounded text-[13px] font-mono text-amber-300 select-text">$1</code>');
+
+      // Bold: **text**
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-white">$1</strong>');
+
+      // Headings: ###, ##, #
+      out = out.replace(/^### (.*$)/gim, '<h3 class="text-base font-semibold text-white mt-3 mb-1 select-text">$1</h3>');
+      out = out.replace(/^## (.*$)/gim, '<h2 class="text-lg font-semibold text-white mt-4 mb-1 select-text">$1</h2>');
+
+      // Bullet lists
+      const lines = out.split('\n');
+      let inList = false;
+      let newLines = [];
+      for (let line of lines) {
+        if (/^\s*[-*]\s+(.*)/.test(line)) {
+          if (!inList) {
+            newLines.push('<ul class="list-disc pl-5 my-2 space-y-1 text-neutral-300 select-text">');
+            inList = true;
+          }
+          newLines.push(line.replace(/^\s*[-*]\s+(.*)/, '<li class="text-neutral-300 select-text">$1</li>'));
+        } else {
+          if (inList) {
+            newLines.push('</ul>');
+            inList = false;
+          }
+          newLines.push(line);
+        }
+      }
+      if (inList) newLines.push('</ul>');
+      out = newLines.join('\n');
+
+      // Paragraph breaks
+      out = out.replace(/\n\n+/g, '</p><p class="mb-2 last:mb-0 select-text">');
+      out = '<p class="mb-2 last:mb-0 select-text">' + out + '</p>';
+      return out;
+    }
+
+    function appendUserMessage(text, timeStr, record = true) {
+      updateBackgroundGlow(false);
+      welcomeBlock.classList.add('hidden');
+      welcomeBlock.classList.remove('flex');
+      stream.classList.remove('hidden');
+      stream.classList.add('flex');
+
+      const container = document.createElement('div');
+      container.className = 'chat-msg-row flex flex-col items-end w-full max-w-3xl mx-auto animate-fadeIn';
+      container.innerHTML = `
+        <div class="relative group/msg flex flex-col items-end max-w-2xl">
+          <div class="msg-bubble chat-msg-text bg-[#1e1f20] hover:bg-[#282a2c] border border-white/10 px-4 py-2.5 rounded-3xl text-[#f5f5f5] font-sans text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap select-text cursor-text">${escapeHtml(text)}</div>
+          <button type="button" class="copy-btn opacity-0 group-hover/msg:opacity-100 focus:opacity-100 transition-opacity mt-1 flex items-center gap-1 text-[11px] text-neutral-400 hover:text-white px-2 py-0.5 rounded cursor-pointer select-none" title="Copy message">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+            <span class="copy-label text-[11px]">Copy</span>
+          </button>
+        </div>
+      `;
+      stream.insertBefore(container, workingIndicator);
+      scrollToBottom();
+
+      if (record) {
+        let conv = conversations.find(c => c.id === activeConvId);
+        if (!conv || activeConvId === 'conv-new') {
+          const newId = 'conv-' + Date.now();
+          conv = {
+            id: newId,
+            title: text.trim().split('\n')[0].substring(0, 32),
+            pinned: false,
+            updated_at: Date.now(),
+            messages: []
+          };
+          conversations.unshift(conv);
+          activeConvId = newId;
+        }
+        conv.messages.push({ role: 'user', content: text, timestamp: timeStr || getTimeStamp() });
+        conv.updated_at = Date.now();
+        renderConversationsList();
+        saveLocal();
+      }
+    }
+
+    function appendAxonResponse(responseText, toolsUsed, timeStr, record = true) {
+      const container = document.createElement('div');
+      container.className = 'chat-msg-row flex items-start gap-3 w-full max-w-3xl mx-auto animate-fadeIn';
+
+      let toolBadgesHtml = '';
+      if (toolsUsed && toolsUsed.length > 0) {
+        const uniqueTools = [...new Set(toolsUsed.map(t => t.name || t))];
+        toolBadgesHtml = uniqueTools.map(tName => `
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#1e1f20] border border-white/10 font-mono text-[11px] text-neutral-300 select-none">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            <span>Used</span>
+            <span class="text-amber-300 font-medium">${escapeHtml(tName)}</span>
+          </div>
+        `).join('');
+      }
+
+      container.innerHTML = `
+        <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center mt-0.5 bg-[#262420] border border-amber-400/30 overflow-hidden shadow-sm shadow-amber-500/10">
+          <img src="AxonicA.jpeg" alt="Axon" class="w-7 h-7 object-contain" style="mix-blend-mode: screen; filter: drop-shadow(rgba(245, 158, 11, 0.4) 0px 0px 5px);">
+        </div>
+        <div class="flex-1 min-w-0">
+          ${toolBadgesHtml ? `<div class="flex flex-wrap gap-1.5 mb-2">${toolBadgesHtml}</div>` : ''}
+          <div class="msg-bubble chat-msg-text text-neutral-200 font-sans text-[15px] leading-relaxed select-text cursor-text">
+            ${renderMarkdown(responseText)}
+          </div>
+          <div class="flex items-center gap-2 mt-2 select-none">
+            <button type="button" class="copy-btn flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-white px-2 py-1 rounded hover:bg-[#282a2c] cursor-pointer transition-colors" title="Copy response">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+              <span class="copy-label text-[11px]">Copy</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      stream.insertBefore(container, workingIndicator);
+      scrollToBottom();
+
+      if (record) {
+        const conv = conversations.find(c => c.id === activeConvId);
+        if (conv) {
+          conv.messages.push({
+            role: 'assistant',
+            content: responseText,
+            tools: toolsUsed,
+            timestamp: timeStr || getTimeStamp()
+          });
+          conv.updated_at = Date.now();
+          saveLocal();
+        }
+      }
+    }
+
+    function appendAxonError(errorMsg) {
+      const container = document.createElement('div');
+      container.className = 'chat-msg-row flex items-start gap-3 w-full max-w-3xl mx-auto animate-fadeIn';
+      container.innerHTML = `
+        <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center mt-0.5 bg-rose-950/40 border border-rose-800/40 text-rose-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+        </div>
+        <div class="flex-1 bg-rose-950/20 border border-rose-800/40 rounded-2xl p-3 text-rose-300 text-sm">
+          ${escapeHtml(errorMsg)}
+        </div>
+      `;
+      stream.insertBefore(container, workingIndicator);
+      scrollToBottom();
+    }
+
+    function renderApprovalCard(reqId, toolName, toolArgs) {
+      const card = document.createElement('div');
+      card.className = 'chat-msg-row flex flex-col items-start w-full max-w-3xl mx-auto animate-fadeIn my-2';
+      card.id = 'approval-' + reqId;
+
+      const argsStr = toolArgs ? Object.entries(toolArgs).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join(', ') : '';
+
+      card.innerHTML = `
+        <div class="bg-[#1e1f20] border border-amber-400/30 rounded-2xl p-4 w-full flex flex-col gap-2 shadow-lg shadow-black/40">
+          <div class="flex items-center gap-2 text-white font-medium text-sm">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+            <span>Approval Required to Execute Tool</span>
+          </div>
+          <div class="font-mono text-xs text-neutral-300 bg-[#131314] p-2.5 rounded-xl border border-white/10">
+            <span class="text-amber-400 font-semibold">${escapeHtml(toolName)}</span>
+            ${argsStr ? `<div class="mt-1 text-white">${escapeHtml(argsStr)}</div>` : ''}
+          </div>
+          <div class="flex items-center gap-2 mt-1" id="approval-actions-${reqId}">
+            <button onclick="window.respondApproval('${reqId}', true)" class="px-4 py-1.5 rounded-full bg-amber-400 text-neutral-950 text-xs font-semibold hover:bg-amber-300 transition-colors flex items-center gap-1 cursor-pointer">
+              <span>Approve</span>
+            </button>
+            <button onclick="window.respondApproval('${reqId}', false)" class="px-4 py-1.5 rounded-full bg-[#282a2c] text-neutral-300 hover:text-white text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer">
+              <span>Deny</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      stream.insertBefore(card, workingIndicator);
+      scrollToBottom();
+    }
+
+    window.respondApproval = function(reqId, approved) {
+      const actionsEl = document.getElementById('approval-actions-' + reqId);
+      if (actionsEl) {
+        actionsEl.innerHTML = approved
+          ? '<span class="text-xs text-amber-400 font-mono">✓ Approved — executing tool...</span>'
+          : '<span class="text-xs text-neutral-500 font-mono">✗ Denied by user.</span>';
+      }
+      fetch(API_BASE + '/api/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: reqId, approved: approved })
+      }).catch(err => console.error('Approval failed:', err));
+    };
+
+    function setWorkingStatus(text) {
+      if (!workingText) return;
+      const clean = (text || 'Thinking').replace(/\.+$/, '');
+      workingText.textContent = clean;
+    }
+
+    async function sendPrompt(text) {
+      appendUserMessage(text, getTimeStamp(), true);
+      textarea.value = '';
+
+      setWorkingStatus('Thinking');
+      workingIndicator.classList.remove('hidden');
+      workingIndicator.classList.add('flex');
+      scrollToBottom();
+
+      try {
+        const response = await fetch(API_BASE + '/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, stream: true, conversation_id: activeConvId })
+        });
+
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status + ' ' + response.statusText);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let toolsCollected = [];
+        let finalResponse = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            try {
+              const event = JSON.parse(trimmed);
+              if (event.type === 'status') {
+                setWorkingStatus(event.text || 'Working');
+              } else if (event.type === 'tool_start') {
+                setWorkingStatus('Using ' + event.tool);
+                toolsCollected.push({ name: event.tool, status: 'running' });
+              } else if (event.type === 'tool_done') {
+                setWorkingStatus('Completed ' + event.tool);
+              } else if (event.type === 'approval_required') {
+                setWorkingStatus('Waiting for approval');
+                renderApprovalCard(event.id, event.tool, event.args);
+              } else if (event.type === 'done') {
+                finalResponse = event.response || '';
+                if (event.tools) toolsCollected = event.tools;
+                if (event.conversation_id && event.conversation_id !== activeConvId) {
+                  const oldId = activeConvId;
+                  activeConvId = event.conversation_id;
+                  const conv = conversations.find(c => c.id === oldId);
+                  if (conv) conv.id = activeConvId;
+                  renderConversationsList();
+                  loadLocal(); // refresh full state from backend
+                }
+              } else if (event.type === 'error') {
+                throw new Error(event.error || 'Server error');
+              }
+            } catch (jsonErr) {
+              if (jsonErr.message && !jsonErr.message.includes('JSON')) throw jsonErr;
+            }
+          }
+        }
+
+        workingIndicator.classList.add('hidden');
+        workingIndicator.classList.remove('flex');
+
+        if (finalResponse) {
+          appendAxonResponse(finalResponse, toolsCollected, getTimeStamp(), true);
+        }
+      } catch (err) {
+        workingIndicator.classList.add('hidden');
+        workingIndicator.classList.remove('flex');
+        const isNetworkErr = err.message === 'Failed to fetch' || err.name === 'TypeError';
+        const msg = isNetworkErr
+          ? 'Cannot connect to AXON backend. Ensure server is running with: python -m axon web'
+          : (err.message || String(err));
+        appendAxonError(msg);
+      }
+    }
+
+    function handleSend() {
+      const text = textarea.value.trim();
+      if (!text) return;
+      updateBackgroundGlow(false);
+      sendPrompt(text);
+    }
+
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+
+    sendBtn.addEventListener('click', handleSend);
+
+    // Copy functionality
+    function copyTextToClipboard(text, btn) {
+      if (!text) return;
+      const clean = text.trim();
+      const onSuccess = () => {
+        const label = btn.querySelector('.copy-label');
+        const origLabel = label ? label.textContent : 'Copy';
+        if (label) label.textContent = 'Copied!';
+        btn.classList.add('text-amber-400');
+        setTimeout(() => {
+          if (label) label.textContent = origLabel;
+          btn.classList.remove('text-amber-400');
+        }, 2000);
+      };
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(clean).then(onSuccess).catch(() => fallbackCopy(clean, onSuccess));
+      } else {
+        fallbackCopy(clean, onSuccess);
+      }
+    }
+
+    function fallbackCopy(text, cb) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.top = '-9999px';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (cb) cb();
+      } catch (e) {}
+    }
+
+    document.addEventListener('click', (e) => {
+      const copyBtn = e.target.closest('.copy-btn');
+      const copyCodeBtn = e.target.closest('.copy-code-btn');
+
+      if (copyBtn) {
+        const msgWrapper = copyBtn.closest('.chat-msg-row');
+        if (msgWrapper) {
+          const textEl = msgWrapper.querySelector('.chat-msg-text');
+          if (textEl) copyTextToClipboard(textEl.innerText || textEl.textContent || '', copyBtn);
+        }
+      } else if (copyCodeBtn) {
+        const codeWrapper = copyCodeBtn.closest('.group\\/code');
+        if (codeWrapper) {
+          const codeEl = codeWrapper.querySelector('code');
+          if (codeEl) copyTextToClipboard(codeEl.innerText || codeEl.textContent || '', copyCodeBtn);
+        }
+      }
+    });
+
+    // Status fetch
+    fetch(API_BASE + '/api/status')
+      .then(res => res.json())
+      .then(data => {
+        if (data.workspace && workspaceNameEl) workspaceNameEl.textContent = data.workspace;
+        if (data.model && modelPillText) {
+          const shortModel = data.model.includes('/') ? data.model.split('/')[1] : data.model;
+          if (shortModel.toLowerCase().includes('flash')) {
+            modelPillText.textContent = 'Flash';
+          } else if (shortModel.toLowerCase().includes('free')) {
+            modelPillText.textContent = 'Flash';
+          } else {
+            modelPillText.textContent = shortModel.length > 10 ? 'Flash' : shortModel;
+          }
+        }
+      })
+      .catch(() => {});
+
+    // Initialize
+    loadLocal();
+  })();
+</script>
+</body></html>
