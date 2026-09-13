@@ -62,6 +62,11 @@ from axon.tools import (
     desktop_inspect_screen,
     screenshot_analyze,
     safety_reset,
+    osiris_briefing,
+    osiris_get_layer,
+    osiris_search_region,
+    osiris_open_globe,
+    osiris_status,
 )
 from axon.router import Router
 from axon.tasks import TaskManager
@@ -250,6 +255,13 @@ class Axon:
         reg.register("task.list", self._tool_task_list, "List all tracked tasks")
         reg.register("task.status", self._tool_task_status, "Get status and details of a task")
         reg.register("task.plan_and_execute", self._tool_task_plan_and_execute, "Decompose a goal into a plan and execute it step-by-step")
+
+        # OSIRIS (Know the World) 3D Global Intelligence & Globe tools
+        reg.register("osiris.briefing", osiris_briefing, "Get live global situation briefing across news, conflicts, earthquakes, and cyber events from OSIRIS")
+        reg.register("osiris.get_layer", osiris_get_layer, "Query live telemetry from an OSIRIS layer: news, conflicts, earthquakes, fires, weather, satellites, flights, maritime, cyber, cctv")
+        reg.register("osiris.search_region", osiris_search_region, "Search OSIRIS dossiers and threat profiles for a specific country or region")
+        reg.register("osiris.open_globe", osiris_open_globe, "Open the interactive OSIRIS 3D Globe in the browser, optionally centered on coordinates")
+        reg.register("osiris.status", osiris_status, "Check connectivity and status of the local OSIRIS 3D intelligence subsystem on port 3001")
 
     def _tool_memory_store(self, content: str = "", category: str = "fact", **kwargs) -> dict:
         """Store information in memory. Content is the text to remember."""

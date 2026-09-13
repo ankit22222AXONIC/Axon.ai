@@ -165,6 +165,13 @@ class SecurityPolicyEngine:
                 tool_name=canonical_name,
             )
 
+        if canonical_name.startswith("osiris."):
+            return PolicyDecision(
+                level=PermissionLevel.SAFE,
+                reason="OSIRIS 3D globe and real-time world intelligence telemetry",
+                tool_name=canonical_name,
+            )
+
         # Default fallback
         return PolicyDecision(
             level=PermissionLevel.CAUTION,

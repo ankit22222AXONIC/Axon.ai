@@ -652,13 +652,13 @@ def run_web(host: str = "127.0.0.1", port: int = 8080, open_browser: bool = True
     osiris_proc = None
     if osiris_dir.exists():
         print("  Starting OSIRIS (Know the World) on port 3001...")
-        cmd = ["npm.cmd", "run", "start"] if sys.platform == "win32" else ["npm", "run", "start"]
+        cmd = ["npm.cmd", "run", "dev"] if sys.platform == "win32" else ["npm", "run", "dev"]
         osiris_proc = subprocess.Popen(
             cmd,
             cwd=str(osiris_dir),
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            shell=False
+            shell=(sys.platform == "win32")
         )
 
     if open_browser:
@@ -669,6 +669,13 @@ def run_web(host: str = "127.0.0.1", port: int = 8080, open_browser: bool = True
         web_server.start(background=False)
     except KeyboardInterrupt:
         print("\nAXON Web UI stopped.")
+    finally:
         axon.shutdown()
         if osiris_proc:
-            osiris_proc.terminate()
+            try:
+                if sys.platform == "win32":
+                    subprocess.run(["taskkill", "/F", "/T", "/PID", str(osiris_proc.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    osiris_proc.terminate()
+            except Exception:
+                pass

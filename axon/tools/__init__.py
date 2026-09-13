@@ -62,6 +62,13 @@ from .desktop import (
     screenshot_analyze,
     safety_reset,
 )
+from .osiris import (
+    osiris_briefing,
+    osiris_get_layer,
+    osiris_search_region,
+    osiris_open_globe,
+    osiris_status,
+)
 
 __all__ = [
     "ToolRegistry",
@@ -121,5 +128,11 @@ __all__ = [
     "desktop_close_window",
     "desktop_inspect_screen",
     "safety_reset",
+    "osiris_briefing",
+    "osiris_get_layer",
+    "osiris_search_region",
+    "osiris_open_globe",
+    "osiris_status",
 ]
+
 
