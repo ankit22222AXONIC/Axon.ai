@@ -38,7 +38,7 @@ LAYER_ROUTES = {
 }
 
 
-def _fetch_osiris_json(endpoint: str, params: Optional[Dict[str, Any]] = None, timeout: float = 4.0) -> Dict[str, Any]:
+def _fetch_osiris_json(endpoint: str, params: Optional[Dict[str, Any]] = None, timeout: float = 12.0) -> Dict[str, Any]:
     """Fetch and decode JSON from the local OSIRIS instance."""
     url = f"{OSIRIS_BASE_URL}{endpoint}"
     if params:

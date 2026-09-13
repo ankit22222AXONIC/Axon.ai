@@ -653,11 +653,14 @@ def run_web(host: str = "127.0.0.1", port: int = 8080, open_browser: bool = True
     if osiris_dir.exists():
         print("  Starting OSIRIS (Know the World) on port 3001...")
         cmd = ["npm.cmd", "run", "dev"] if sys.platform == "win32" else ["npm", "run", "dev"]
+        osiris_log = Path.home() / ".axon" / "osiris.log"
+        osiris_log.parent.mkdir(parents=True, exist_ok=True)
+        osiris_log_handle = open(osiris_log, "w", encoding="utf-8")
         osiris_proc = subprocess.Popen(
             cmd,
             cwd=str(osiris_dir),
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stderr=osiris_log_handle,
             shell=(sys.platform == "win32")
         )
 
