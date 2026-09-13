@@ -10,6 +10,13 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 
 from axon.core import Axon
+from axon.core.config import (
+    has_openrouter_api_key,
+    get_masked_openrouter_api_key,
+    save_openrouter_api_key,
+    remove_openrouter_api_key,
+)
+from axon.ai.client import OpenRouterClient
 
 
 class WebApprovalBridge:
@@ -287,6 +294,16 @@ def create_web_handler(
                     return
 
 
+            if path == "/api/key/status":
+                configured = has_openrouter_api_key()
+                masked = get_masked_openrouter_api_key() if configured else None
+                self._send_json({
+                    "configured": configured,
+                    "masked_key": masked,
+                    "provider": "OpenRouter",
+                })
+                return
+
             if path == "/api/status":
                 workspace = Path.cwd().name
                 model = axon.config.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
@@ -427,7 +444,40 @@ def create_web_handler(
                 self._send_json({"success": success, "active_id": conv_store.active_id})
                 return
 
+            if path == "/api/key/validate":
+                key_val = payload.get("api_key", "").strip()
+                valid, msg = OpenRouterClient.validate_api_key(key_val)
+                self._send_json({"valid": valid, "message": msg})
+                return
+
+            if path == "/api/key/save":
+                key_val = payload.get("api_key", "").strip()
+                valid, msg = OpenRouterClient.validate_api_key(key_val)
+                if not valid:
+                    self._send_json({"success": False, "error": msg}, status=400)
+                    return
+                saved = save_openrouter_api_key(key_val)
+                if saved:
+                    axon.update_api_key(key_val)
+                    masked = get_masked_openrouter_api_key()
+                    self._send_json({"success": True, "masked_key": masked})
+                else:
+                    self._send_json({"success": False, "error": "Could not write key to local configuration."}, status=500)
+                return
+
+            if path == "/api/key/remove":
+                remove_openrouter_api_key()
+                axon.update_api_key("")
+                self._send_json({"success": True})
+                return
+
             if path == "/api/chat":
+                if not has_openrouter_api_key():
+                    self._send_json({
+                        "error": "OpenRouter API key is not configured. Please connect your API key in setup to continue."
+                    }, status=401)
+                    return
+
                 message = payload.get("message", "").strip()
                 if not message:
                     self._send_json({"error": "Empty message"}, status=400)

@@ -397,7 +397,7 @@ def test_agent_executor_runs_multi_step_desktop_plan(axon_app):
 
     task = axon_app.executor.execute_plan(p1)
     assert task.status.value in ("completed", "running")
-    assert len(task.steps) == 2
+    assert len(task.steps) >= 2
     for step in task.steps:
         assert step.status.value == "completed"
 

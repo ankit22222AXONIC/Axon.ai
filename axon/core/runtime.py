@@ -147,6 +147,12 @@ class Axon:
         })
         return self
 
+    def update_api_key(self, api_key: str):
+        """Update active API key across all AI clients."""
+        clean = (api_key or "").strip()
+        self.ai_client.update_api_key(clean)
+        self.coding_client.update_api_key(clean)
+
     def shutdown(self):
         self.state.set(AxonStatus.SHUTTING_DOWN)
         self.memory.close()

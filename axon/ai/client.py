@@ -4,7 +4,7 @@ import json
 import os
 import urllib.request
 import urllib.error
-from typing import Optional, List, Dict, Any, Callable
+from typing import Optional, List, Dict, Any, Callable, Tuple
 
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -50,6 +50,54 @@ class OpenRouterClient:
     @property
     def has_api_key(self) -> bool:
         return bool(self._api_key and self._api_key != "PASTE_YOUR_OPENROUTER_KEY_HERE")
+
+    def update_api_key(self, api_key: str):
+        """Update active and primary API key in memory."""
+        clean = (api_key or "").strip()
+        self._api_key = clean
+        self._primary_api_key = clean
+
+    @staticmethod
+    def validate_api_key(api_key: str, timeout: int = 10) -> Tuple[bool, str]:
+        """Validate an OpenRouter API key via a minimal, safe authentication request.
+        
+        Uses OpenRouter's key validation endpoint without spending any inference tokens.
+        Returns (is_valid, message).
+        """
+        clean_key = (api_key or "").strip()
+        if not clean_key or clean_key == "PASTE_YOUR_OPENROUTER_KEY_HERE":
+            return False, "API key cannot be empty."
+
+        headers = {
+            "Authorization": f"Bearer {clean_key}",
+            "HTTP-Referer": "https://github.com/axon",
+            "X-Title": "AXON",
+            "User-Agent": "AXON-Setup/1.0",
+        }
+
+        req = urllib.request.Request(
+            "https://openrouter.ai/api/v1/auth/key",
+            headers=headers,
+            method="GET",
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                if response.status == 200:
+                    return True, "API key verified successfully."
+                return False, f"Unexpected response status ({response.status})."
+        except urllib.error.HTTPError as e:
+            if e.code == 401:
+                return False, "Invalid OpenRouter API key. Please check the key and try again."
+            if e.code == 403:
+                return False, "Access forbidden. Your OpenRouter key may have restricted permissions."
+            return False, f"OpenRouter returned error (HTTP {e.code})."
+        except urllib.error.URLError as e:
+            return False, f"Unable to reach OpenRouter: {e.reason}"
+        except TimeoutError:
+            return False, "Verification timed out. Please check your network connection."
+        except Exception as e:
+            return False, f"Verification failed: {e}"
 
     def chat(
         self,

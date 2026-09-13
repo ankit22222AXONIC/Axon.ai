@@ -28,6 +28,7 @@ BLOCKED_COMMAND_PATTERNS = [
 
     # Shell commands targeting AXON security files or .env
     (r"(?:del|rm|remove-item)\s+.*(?:\.env|audit\.log)", "Terminal deletion of AXON configuration or audit logs is blocked"),
+    (r"(?:cat|type|get-content|head|tail|more|less)\s+.*\.env\b", "Terminal reading of credential files (.env) is blocked"),
 
     # Destructive Git operations (blocked to prevent code loss)
     (r"\bgit\s+reset\s+--hard\b", "Destructive Git hard reset is blocked"),

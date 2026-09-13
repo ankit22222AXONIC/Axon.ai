@@ -188,7 +188,7 @@
 <span class="text-[10px] text-neutral-400">Pro Developer</span>
 </div>
 </div>
-<button class="p-1.5 text-neutral-400 hover:text-neutral-200 rounded-lg hover:bg-[#313336] transition-colors cursor-pointer" title="Settings">
+<button onclick="window.toggleSettings(true)" class="p-1.5 text-neutral-400 hover:text-neutral-200 rounded-lg hover:bg-[#313336] transition-colors cursor-pointer" title="Settings">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
 <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
@@ -211,6 +211,176 @@
       BACK TO AXONIC
     </button>
     <iframe id="osiris-iframe" src="about:blank" data-src="http://localhost:3001" allow="camera; microphone; geolocation; fullscreen; accelerometer; gyroscope; autoplay" class="w-full flex-1 border-0 bg-[#131314]"></iframe>
+  </div>
+
+  <!-- First-Run Welcome Screen Overlay (Full Screen) -->
+  <div id="first-run-setup-modal" class="opacity-0 pointer-events-none fixed inset-0 z-[300] bg-[#131314] flex flex-col items-center justify-center p-4 transition-all duration-300 overflow-y-auto">
+    <!-- Radiant Ambient Golden Light Glow -->
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 700px 500px at 50% 38%, rgba(251, 191, 36, 0.28) 0%, rgba(245, 158, 11, 0.16) 35%, rgba(18, 17, 16, 0.98) 75%), #131314;"></div>
+
+    <!-- Centered Setup Card -->
+    <div class="relative z-10 w-full max-w-md bg-[#1e1f20] border border-[#2d2f31] rounded-3xl p-8 sm:p-9 shadow-2xl shadow-black/80 flex flex-col items-center text-center">
+      <!-- AXONIC Logo -->
+      <div class="w-16 h-16 rounded-2xl bg-[#262420] border border-amber-400/40 flex items-center justify-center mb-5 shadow-lg shadow-amber-500/20">
+        <img src="AxonicA.jpeg" alt="AXONIC" class="w-12 h-12 object-contain" style="mix-blend-mode: screen; filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6));">
+      </div>
+
+      <!-- Headings -->
+      <h1 class="text-2xl font-bold text-neutral-100 tracking-tight">Welcome to AXONIC</h1>
+      <p class="text-xs text-neutral-400 mt-2 leading-relaxed max-w-xs">Connect your OpenRouter API key to get started.</p>
+
+      <!-- Input Form -->
+      <div class="w-full mt-6 text-left">
+        <label for="setupApiKeyInput" class="block text-[11px] font-medium text-neutral-400 mb-1.5 uppercase tracking-wider">OpenRouter API Key</label>
+        <div class="relative flex items-center">
+          <input 
+            type="password" 
+            id="setupApiKeyInput" 
+            placeholder="sk-or-v1-..." 
+            autocomplete="off"
+            spellcheck="false"
+            class="w-full pl-3.5 pr-10 py-3 text-xs font-mono bg-[#282a2c] border border-[#2d2f31] rounded-xl text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-amber-400/80 focus:ring-1 focus:ring-amber-400/50 transition-all"
+            onkeydown="if(event.key==='Enter') window.submitFirstRunKey()"
+          >
+          <button 
+            type="button" 
+            id="setupToggleVisibilityBtn" 
+            onclick="window.toggleKeyInputVisibility('setupApiKeyInput', this)" 
+            class="absolute right-2.5 p-1.5 text-neutral-400 hover:text-neutral-200 rounded-lg hover:bg-neutral-800 transition-colors focus:outline-none"
+            title="Show / Hide API key"
+          >
+            <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+          </button>
+        </div>
+
+        <!-- Error Alert -->
+        <div id="setupKeyError" class="hidden mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start space-x-2.5">
+          <svg class="w-4 h-4 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><line x1="12" y1="8" x2="12" y2="12" stroke-width="2"></line><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"></line></svg>
+          <span id="setupKeyErrorText" class="leading-tight">Invalid OpenRouter API key. Please check and try again.</span>
+        </div>
+      </div>
+
+      <!-- Continue Button -->
+      <button 
+        type="button" 
+        id="setupContinueBtn" 
+        onclick="window.submitFirstRunKey()" 
+        class="w-full mt-5 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-neutral-950 font-semibold text-xs tracking-wide shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span id="setupContinueBtnText">Continue</span>
+        <svg id="setupContinueSpinner" class="hidden w-4 h-4 animate-spin text-neutral-950" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+      </button>
+
+      <!-- Subtext -->
+      <div class="mt-4 flex items-center justify-center space-x-1.5 text-[11px] text-neutral-500">
+        <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"></rect><path d="M7 11V7a5 5 0 0110 0v4" stroke-width="2"></path></svg>
+        <span>Your API key is stored locally on this computer.</span>
+      </div>
+      <div class="mt-2 text-[11px] text-neutral-500">
+        Don't have an API key? <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 hover:underline">Get one from OpenRouter &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal Overlay -->
+  <div id="settings-modal-container" onclick="window.toggleSettings(false)" class="opacity-0 pointer-events-none fixed inset-0 z-[160] bg-[#131314]/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 transition-all duration-200">
+    <!-- Centered Modal Dialog (Max-width 560px) -->
+    <div id="settings-modal-card" onclick="event.stopPropagation()" class="relative w-full max-w-[560px] bg-[#1e1f20] border border-[#2d2f31] rounded-2xl shadow-2xl shadow-black/80 flex flex-col overflow-hidden transition-all duration-200 transform scale-95 opacity-0 my-auto select-text">
+      <!-- Header Bar -->
+      <div class="px-6 py-4 border-b border-[#2d2f31] flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-[#282a2c] border border-[#2d2f31] flex items-center justify-center text-neutral-300 shadow-sm">
+            <svg class="w-4 h-4 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-base font-semibold text-neutral-100 tracking-tight">Settings</h2>
+            <p class="text-xs text-neutral-400">AXONIC preferences and API configuration</p>
+          </div>
+        </div>
+        <button onclick="window.toggleSettings(false)" class="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-200 hover:bg-[#282a2c] transition-colors cursor-pointer" title="Close (Esc)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke-width="2" stroke-linecap="round"></line><line x1="6" y1="6" x2="18" y2="18" stroke-width="2" stroke-linecap="round"></line></svg>
+        </button>
+      </div>
+
+      <!-- Content Body -->
+      <div class="p-6 space-y-6">
+        <!-- OpenRouter API Key Section -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-neutral-200 uppercase tracking-wider">OpenRouter API Key</span>
+            <span id="settingsKeyStatusBadge" class="px-2 py-0.5 rounded text-[10px] font-medium border bg-neutral-800 text-neutral-400 border-neutral-700">Checking...</span>
+          </div>
+          
+          <div class="p-3.5 rounded-xl bg-[#282a2c]/80 border border-[#2d2f31] flex items-center justify-between">
+            <div class="flex items-center space-x-3 min-w-0">
+              <span class="text-base">🔐</span>
+              <div class="truncate">
+                <div id="settingsMaskedKeyDisplay" class="text-xs font-mono text-neutral-200 truncate">sk-••••••••</div>
+                <div class="text-[11px] text-neutral-500">Stored locally in protected .env</div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 shrink-0">
+              <button onclick="window.toggleSettingsKeyInput(true)" id="settingsReplaceKeyBtn" class="px-2.5 py-1.5 rounded-lg bg-[#1e1f20] hover:bg-neutral-800 border border-[#2d2f31] hover:border-neutral-600 text-neutral-300 hover:text-white text-xs font-medium transition-all cursor-pointer">
+                Update
+              </button>
+              <button onclick="window.handleRemoveKeyClick()" id="settingsRemoveKeyBtn" class="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-rose-200 text-xs font-medium transition-all cursor-pointer">
+                Remove
+              </button>
+            </div>
+          </div>
+
+          <!-- Update Key Form -->
+          <div id="settingsUpdateKeyForm" class="hidden p-4 rounded-xl bg-[#242628] border border-[#2d2f31] space-y-3">
+            <label for="settingsNewKeyInput" class="block text-xs font-medium text-neutral-300">Enter New OpenRouter API Key</label>
+            <div class="relative flex items-center">
+              <input 
+                type="password" 
+                id="settingsNewKeyInput" 
+                placeholder="sk-or-v1-..." 
+                autocomplete="off" 
+                class="w-full pl-3 pr-10 py-2 text-xs font-mono bg-[#1e1f20] border border-[#2d2f31] rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-amber-400"
+                onkeydown="if(event.key==='Enter') window.submitSettingsUpdateKey()"
+              >
+              <button type="button" onclick="window.toggleKeyInputVisibility('settingsNewKeyInput', this)" class="absolute right-2 p-1 text-neutral-400 hover:text-neutral-200 cursor-pointer">
+                <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+              </button>
+            </div>
+            <div id="settingsUpdateError" class="hidden text-xs text-rose-400 flex items-center space-x-1.5">
+              <span>Failed to validate key.</span>
+            </div>
+            <div class="flex items-center justify-end space-x-2 pt-1">
+              <button onclick="window.toggleSettingsKeyInput(false)" class="px-3 py-1.5 rounded-lg text-neutral-400 hover:text-neutral-200 text-xs cursor-pointer">
+                Cancel
+              </button>
+              <button onclick="window.submitSettingsUpdateKey()" id="settingsSaveNewKeyBtn" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-semibold text-xs transition-colors flex items-center space-x-1.5 cursor-pointer">
+                <span>Save Key</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- System & Workspace Info Section -->
+        <div class="space-y-2 pt-2 border-t border-[#2d2f31]">
+          <span class="text-xs font-semibold text-neutral-200 uppercase tracking-wider">Environment</span>
+          <div class="grid grid-cols-2 gap-3 pt-1 text-xs">
+            <div class="p-3 rounded-xl bg-[#282a2c]/50 border border-[#2d2f31]">
+              <span class="text-[11px] text-neutral-400 block">Workspace</span>
+              <span id="settingsWorkspaceName" class="font-mono text-neutral-200 font-medium">Axon</span>
+            </div>
+            <div class="p-3 rounded-xl bg-[#282a2c]/50 border border-[#2d2f31]">
+              <span class="text-[11px] text-neutral-400 block">AI Model</span>
+              <span id="settingsModelName" class="font-mono text-neutral-200 font-medium truncate block">nex-n2.5-mini</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Tasks & Habit Tracker Modal Overlay -->
@@ -2330,8 +2500,245 @@
         if (filesModal && !filesModal.classList.contains('opacity-0')) {
           window.toggleFilesAndMemory(false);
         }
+        const settingsModal = document.getElementById('settings-modal-container');
+        if (settingsModal && !settingsModal.classList.contains('opacity-0')) {
+          window.toggleSettings(false);
+        }
       }
     });
+
+    // ==========================================
+    // AXONIC API KEY & FIRST-RUN SETUP
+    // ==========================================
+    let isApiKeyConfigured = false;
+
+    window.checkApiKeyStatus = function() {
+      fetch(API_BASE + '/api/key/status')
+        .then(res => res.json())
+        .then(data => {
+          isApiKeyConfigured = !!data.configured;
+          const setupModal = document.getElementById('first-run-setup-modal');
+          const settingsBadge = document.getElementById('settingsKeyStatusBadge');
+          const settingsMaskedDisplay = document.getElementById('settingsMaskedKeyDisplay');
+
+          if (isApiKeyConfigured) {
+            if (setupModal) {
+              setupModal.classList.add('opacity-0', 'pointer-events-none');
+            }
+            if (settingsBadge) {
+              settingsBadge.textContent = 'Configured';
+              settingsBadge.className = 'px-2 py-0.5 rounded text-[10px] font-medium border bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+            }
+            if (settingsMaskedDisplay) {
+              settingsMaskedDisplay.textContent = data.masked_key || 'Configured (Encrypted)';
+            }
+          } else {
+            if (setupModal) {
+              setupModal.classList.remove('opacity-0', 'pointer-events-none');
+              const input = document.getElementById('setupApiKeyInput');
+              if (input) setTimeout(() => input.focus(), 200);
+            }
+            if (settingsBadge) {
+              settingsBadge.textContent = 'Not Configured';
+              settingsBadge.className = 'px-2 py-0.5 rounded text-[10px] font-medium border bg-rose-500/15 text-rose-400 border-rose-500/30';
+            }
+            if (settingsMaskedDisplay) {
+              settingsMaskedDisplay.textContent = 'No API key configured';
+            }
+          }
+        })
+        .catch(err => {
+          console.warn('API key status check failed:', err);
+        });
+    };
+
+    window.toggleKeyInputVisibility = function(inputId, btnEl) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      if (btnEl) {
+        btnEl.innerHTML = isPassword
+          ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path></svg>`
+          : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>`;
+      }
+    };
+
+    window.submitFirstRunKey = function() {
+      const input = document.getElementById('setupApiKeyInput');
+      const errBox = document.getElementById('setupKeyError');
+      const errText = document.getElementById('setupKeyErrorText');
+      const btn = document.getElementById('setupContinueBtn');
+      const btnText = document.getElementById('setupContinueBtnText');
+      const spinner = document.getElementById('setupContinueSpinner');
+
+      if (!input) return;
+      const keyVal = input.value.trim();
+      if (!keyVal) {
+        if (errBox && errText) {
+          errText.textContent = 'Please enter your OpenRouter API key.';
+          errBox.classList.remove('hidden');
+        }
+        input.focus();
+        return;
+      }
+
+      if (errBox) errBox.classList.add('hidden');
+      if (btn) btn.disabled = true;
+      if (btnText) btnText.textContent = 'Validating key...';
+      if (spinner) spinner.classList.remove('hidden');
+
+      fetch(API_BASE + '/api/key/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: keyVal }),
+      })
+        .then(async res => {
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            throw new Error(data.error || 'Invalid API key or network error.');
+          }
+          return data;
+        })
+        .then(data => {
+          input.value = '';
+          const setupModal = document.getElementById('first-run-setup-modal');
+          if (setupModal) {
+            setupModal.classList.add('opacity-0', 'pointer-events-none');
+          }
+          isApiKeyConfigured = true;
+          window.checkApiKeyStatus();
+        })
+        .catch(err => {
+          if (errBox && errText) {
+            errText.textContent = err.message || 'Invalid API key. Please check and try again.';
+            errBox.classList.remove('hidden');
+          }
+          input.focus();
+        })
+        .finally(() => {
+          if (btn) btn.disabled = false;
+          if (btnText) btnText.textContent = 'Continue';
+          if (spinner) spinner.classList.add('hidden');
+        });
+    };
+
+    window.toggleSettings = function(forceState) {
+      const modal = document.getElementById('settings-modal-container');
+      const card = document.getElementById('settings-modal-card');
+      if (!modal || !card) return;
+
+      const isOpening = (typeof forceState === 'boolean') ? forceState : modal.classList.contains('opacity-0');
+      if (isOpening) {
+        window.checkApiKeyStatus();
+        window.toggleSettingsKeyInput(false);
+        fetch(API_BASE + '/api/status')
+          .then(res => res.json())
+          .then(st => {
+            const wsEl = document.getElementById('settingsWorkspaceName');
+            const modelEl = document.getElementById('settingsModelName');
+            if (wsEl && st.workspace) wsEl.textContent = st.workspace;
+            if (modelEl && st.model) modelEl.textContent = st.model;
+          })
+          .catch(() => {});
+
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+      } else {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.classList.remove('opacity-100');
+        card.classList.add('scale-95', 'opacity-0');
+        card.classList.remove('scale-100', 'opacity-100');
+      }
+    };
+
+    window.toggleSettingsKeyInput = function(show) {
+      const form = document.getElementById('settingsUpdateKeyForm');
+      const errBox = document.getElementById('settingsUpdateError');
+      const input = document.getElementById('settingsNewKeyInput');
+      if (!form) return;
+      if (show) {
+        form.classList.remove('hidden');
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+      } else {
+        form.classList.add('hidden');
+        if (errBox) errBox.classList.add('hidden');
+      }
+    };
+
+    window.submitSettingsUpdateKey = function() {
+      const input = document.getElementById('settingsNewKeyInput');
+      const errBox = document.getElementById('settingsUpdateError');
+      const btn = document.getElementById('settingsSaveNewKeyBtn');
+      if (!input) return;
+      const keyVal = input.value.trim();
+      if (!keyVal) {
+        if (errBox) {
+          errBox.textContent = 'Please enter a valid API key.';
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (errBox) errBox.classList.add('hidden');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span>Validating...</span>`;
+      }
+
+      fetch(API_BASE + '/api/key/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: keyVal }),
+      })
+        .then(async res => {
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            throw new Error(data.error || 'Failed to validate API key.');
+          }
+          return data;
+        })
+        .then(data => {
+          input.value = '';
+          window.toggleSettingsKeyInput(false);
+          window.checkApiKeyStatus();
+        })
+        .catch(err => {
+          if (errBox) {
+            errBox.textContent = err.message || 'Failed to validate key.';
+            errBox.classList.remove('hidden');
+          }
+        })
+        .finally(() => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<span>Save Key</span>`;
+          }
+        });
+    };
+
+    window.handleRemoveKeyClick = function() {
+      const confirmed = window.confirm('Are you sure you want to remove your OpenRouter API key?\n\nAXONIC will require setup before you can use AI features again.');
+      if (!confirmed) return;
+
+      fetch(API_BASE + '/api/key/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then(res => res.json())
+        .then(data => {
+          window.toggleSettings(false);
+          window.checkApiKeyStatus();
+        })
+        .catch(err => {
+          alert('Failed to remove API key: ' + err.message);
+        });
+    };
 
     // Initialize Tasks & Habits & Memories
     loadHabitsAndTasks();
@@ -2340,6 +2747,7 @@
 
     // Initialize
     loadLocal();
+    checkApiKeyStatus();
   })();
 </script>
 </body></html>
