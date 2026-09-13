@@ -121,12 +121,7 @@ class SecurityPolicyEngine:
             return self._evaluate_memory(canonical_name, args)
 
         if canonical_name.startswith("browser."):
-            return PolicyDecision(
-                level=PermissionLevel.CAUTION,
-                reason="Opening external browser URLs/searches is low-risk user interaction",
-                tool_name=canonical_name,
-                metadata={"url": args.get("url") or args.get("query")},
-            )
+            return self._evaluate_browser(canonical_name, args)
 
         if canonical_name.startswith("desktop."):
             return self._evaluate_desktop(canonical_name, args)
@@ -151,7 +146,10 @@ class SecurityPolicyEngine:
                 tool_name=canonical_name,
             )
 
-        if canonical_name in ("system.info", "system.resources", "processes.list", "processes.find"):
+        if canonical_name.startswith("system."):
+            return self._evaluate_system(canonical_name, args)
+
+        if canonical_name in ("processes.list", "processes.find"):
             return PolicyDecision(
                 level=PermissionLevel.SAFE,
                 reason="Read-only system inspection telemetry",
@@ -774,5 +772,80 @@ class SecurityPolicyEngine:
             reason=f"Keyboard action '{tool_name}'",
             tool_name=tool_name,
         )
+
+    def _evaluate_browser(self, tool_name: str, args: dict) -> PolicyDecision:
+        """Evaluate browser automation tools."""
+        if tool_name == "browser.close_window":
+            browser_target = args.get("browser_name") or "browser"
+            return PolicyDecision(
+                level=PermissionLevel.APPROVAL_REQUIRED,
+                reason=f"Closing browser window ({browser_target}) requires user approval to prevent loss of unsaved work or open tabs",
+                tool_name=tool_name,
+                metadata={
+                    "browser": browser_target,
+                    "title": "Close Browser Window?",
+                    "prompt": "Closing the browser window may lose unsaved work or open session tabs. Continue?",
+                },
+            )
+
+        if tool_name == "browser.close_tab":
+            return PolicyDecision(
+                level=PermissionLevel.SAFE,
+                reason="Closing an individual browser tab is allowed without approval",
+                tool_name=tool_name,
+                metadata={"tab_title": args.get("tab_title")},
+            )
+
+        return PolicyDecision(
+            level=PermissionLevel.CAUTION,
+            reason="Opening external browser URLs/searches is low-risk user interaction",
+            tool_name=tool_name,
+            metadata={"url": args.get("url") or args.get("query")},
+        )
+
+    def _evaluate_system(self, tool_name: str, args: dict) -> PolicyDecision:
+        """Evaluate system power and telemetry tools."""
+        if tool_name == "system.shutdown":
+            delay = args.get("delay_seconds", 60)
+            return PolicyDecision(
+                level=PermissionLevel.APPROVAL_REQUIRED,
+                reason="Shutdown will power off your computer and requires explicit human approval",
+                tool_name=tool_name,
+                metadata={
+                    "action": "shutdown",
+                    "delay_seconds": delay,
+                    "title": "Shutdown Computer?",
+                    "prompt": "Shutdown will power off your computer. Continue?",
+                },
+            )
+
+        if tool_name == "system.restart":
+            delay = args.get("delay_seconds", 60)
+            return PolicyDecision(
+                level=PermissionLevel.APPROVAL_REQUIRED,
+                reason="Restart will reboot Windows and requires explicit human approval",
+                tool_name=tool_name,
+                metadata={
+                    "action": "restart",
+                    "delay_seconds": delay,
+                    "title": "Restart Computer?",
+                    "prompt": "This will restart Windows and may interrupt running applications. Continue?",
+                },
+            )
+
+        if tool_name == "system.cancel_shutdown":
+            return PolicyDecision(
+                level=PermissionLevel.CAUTION,
+                reason="Aborting scheduled shutdown or restart is safe",
+                tool_name=tool_name,
+            )
+
+        # system.info, system.resources
+        return PolicyDecision(
+            level=PermissionLevel.SAFE,
+            reason="Read-only system inspection telemetry",
+            tool_name=tool_name,
+        )
+
 
 

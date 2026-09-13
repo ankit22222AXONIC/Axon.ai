@@ -247,3 +247,93 @@ def browser_click_link(text: str) -> Dict[str, Any]:
         }
     except Exception as e:
         return {"error": f"Failed to click link '{clean_text}': {e}"}
+
+
+def browser_close_tab(tab_title: Optional[str] = None) -> Dict[str, Any]:
+    """Close the currently active browser tab or a tab matching tab_title.
+    
+    Uses browser shortcut Ctrl+W to close the active tab. Does NOT require approval.
+    
+    Args:
+        tab_title: Optional title or keyword to switch to before closing the tab.
+    """
+    try:
+        from axon.tools.desktop import desktop_switch_window, keyboard_hotkey
+
+        focused = False
+        if tab_title and str(tab_title).strip():
+            target = str(tab_title).strip()
+            switch_res = desktop_switch_window(target)
+            if switch_res.get("status") == "success" and switch_res.get("switched"):
+                focused = True
+
+        if not focused:
+            focused = _focus_browser_window()
+
+        time.sleep(0.15)
+        hotkey_res = keyboard_hotkey("ctrl+w")
+
+        if hotkey_res.get("status") != "success":
+            return {"error": f"Failed to send close tab hotkey: {hotkey_res.get('error')}"}
+
+        return {
+            "status": "success",
+            "action": "closed_tab",
+            "tab_title": tab_title or "active",
+            "browser_focused": focused,
+            "method": "ctrl_w",
+            "message": f"Closed browser tab{f' matching \"{tab_title}\"' if tab_title else ''}",
+        }
+    except Exception as e:
+        return {"error": f"Failed to close browser tab: {e}"}
+
+
+def browser_close_window(browser_name: Optional[str] = None) -> Dict[str, Any]:
+    """Close an entire browser window gracefully (Chrome, Edge, Firefox, etc.).
+    
+    Warning: Requires user approval to avoid losing unsaved tabs or ongoing work.
+    
+    Args:
+        browser_name: Optional name of the browser (e.g. 'chrome', 'edge', 'firefox'). Defaults to active browser.
+    """
+    try:
+        from axon.tools.desktop import desktop_close_window, desktop_get_active_window
+
+        target_name = (browser_name or "").strip().lower()
+        if not target_name:
+            # Check if active window is a browser
+            active = desktop_get_active_window()
+            active_title = str(active.get("title", "")).lower()
+            active_proc = str(active.get("process", "")).lower()
+            found_browser = None
+            for b in ("chrome", "edge", "msedge", "firefox", "brave", "opera"):
+                if b in active_title or b in active_proc:
+                    found_browser = b
+                    break
+            target_name = found_browser or "chrome"
+
+        # Map common browser aliases
+        alias_map = {
+            "google chrome": "chrome",
+            "microsoft edge": "edge",
+            "msedge": "edge",
+        }
+        target_name = alias_map.get(target_name, target_name)
+
+        close_res = desktop_close_window(target_name)
+        if close_res.get("status") == "success":
+            return {
+                "status": "success",
+                "action": "closed_window",
+                "browser": target_name,
+                "method": close_res.get("method", "wm_close"),
+                "message": f"Successfully closed browser window for '{target_name}'",
+            }
+        else:
+            return {
+                "error": close_res.get("error") or f"Could not find or close open window for browser '{target_name}'",
+                "browser": target_name,
+            }
+    except Exception as e:
+        return {"error": f"Failed to close browser window: {e}"}
+

@@ -4,7 +4,7 @@ import os
 import platform
 import shutil
 import subprocess
-from typing import Optional
+from typing import Optional, Dict, Any
 
 
 def system_info() -> dict:
@@ -166,3 +166,169 @@ def processes_find(query: str) -> list[dict]:
         return matches
     except Exception as e:
         return [{"error": str(e)}]
+
+
+# Module-level state tracking for pending system power actions
+_PENDING_SYSTEM_ACTION: Optional[Dict[str, Any]] = None
+
+
+def _is_pending_action_active() -> bool:
+    global _PENDING_SYSTEM_ACTION
+    if not _PENDING_SYSTEM_ACTION:
+        return False
+    import time
+    scheduled_at = _PENDING_SYSTEM_ACTION.get("scheduled_at", 0)
+    delay = _PENDING_SYSTEM_ACTION.get("delay_seconds", 60)
+    if time.time() - scheduled_at < (delay + 10):
+        return True
+    _PENDING_SYSTEM_ACTION = None
+    return False
+
+
+def system_shutdown(delay_seconds: int = 60, message: Optional[str] = None) -> Dict[str, Any]:
+    """Shut down the computer after explicit human approval.
+    
+    Args:
+        delay_seconds: Time to wait before powering off (0 to 3600 seconds, default 60).
+        message: Optional notification message displayed on Windows before shutdown.
+    """
+    global _PENDING_SYSTEM_ACTION
+
+    # 1. Validate arguments
+    try:
+        delay = int(delay_seconds)
+        if delay < 0 or delay > 3600:
+            return {"error": "Invalid delay_seconds: must be an integer between 0 and 3600 seconds."}
+    except (ValueError, TypeError):
+        return {"error": "delay_seconds must be a valid numeric integer."}
+
+    # 2. Prevent duplicate shutdown/restart requests
+    if _is_pending_action_active():
+        current_action = _PENDING_SYSTEM_ACTION.get("action", "power")
+        return {
+            "error": f"A system {current_action} action is already pending. Duplicate requests are blocked to prevent system instability.",
+            "pending_action": _PENDING_SYSTEM_ACTION,
+        }
+
+    # 3. Sanitize message & redact secrets
+    clean_msg = "AXONIC: System shutdown requested."
+    if message and str(message).strip():
+        raw_msg = str(message).strip()[:180].replace('"', "'")
+        from axon.security.secrets import redact_text
+        sanitized, _ = redact_text(raw_msg)
+        clean_msg = f"AXONIC: {sanitized}"
+
+    # 4. Execute Windows shutdown command
+    try:
+        cmd = ["shutdown.exe", "/s", "/t", str(delay), "/c", clean_msg]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+
+        if result.returncode == 0:
+            import time
+            _PENDING_SYSTEM_ACTION = {
+                "action": "shutdown",
+                "delay_seconds": delay,
+                "scheduled_at": time.time(),
+                "message": clean_msg,
+            }
+            return {
+                "status": "success",
+                "action": "shutdown",
+                "delay_seconds": delay,
+                "message": f"Computer shutdown scheduled in {delay} seconds. Unsaved work should be saved now.",
+            }
+        else:
+            stderr = result.stderr.strip()
+            stdout = result.stdout.strip()
+            return {
+                "error": stderr or stdout or "Failed to initiate Windows shutdown.",
+                "returncode": result.returncode,
+            }
+    except Exception as e:
+        return {"error": f"System shutdown execution error: {e}"}
+
+
+def system_restart(delay_seconds: int = 60, message: Optional[str] = None) -> Dict[str, Any]:
+    """Restart / reboot the computer after explicit human approval.
+    
+    Args:
+        delay_seconds: Time to wait before rebooting (0 to 3600 seconds, default 60).
+        message: Optional notification message displayed on Windows before reboot.
+    """
+    global _PENDING_SYSTEM_ACTION
+
+    # 1. Validate arguments
+    try:
+        delay = int(delay_seconds)
+        if delay < 0 or delay > 3600:
+            return {"error": "Invalid delay_seconds: must be an integer between 0 and 3600 seconds."}
+    except (ValueError, TypeError):
+        return {"error": "delay_seconds must be a valid numeric integer."}
+
+    # 2. Prevent duplicate shutdown/restart requests
+    if _is_pending_action_active():
+        current_action = _PENDING_SYSTEM_ACTION.get("action", "power")
+        return {
+            "error": f"A system {current_action} action is already pending. Duplicate requests are blocked to prevent system instability.",
+            "pending_action": _PENDING_SYSTEM_ACTION,
+        }
+
+    # 3. Sanitize message & redact secrets
+    clean_msg = "AXONIC: System restart requested."
+    if message and str(message).strip():
+        raw_msg = str(message).strip()[:180].replace('"', "'")
+        from axon.security.secrets import redact_text
+        sanitized, _ = redact_text(raw_msg)
+        clean_msg = f"AXONIC: {sanitized}"
+
+    # 4. Execute Windows restart command
+    try:
+        cmd = ["shutdown.exe", "/r", "/t", str(delay), "/c", clean_msg]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+
+        if result.returncode == 0:
+            import time
+            _PENDING_SYSTEM_ACTION = {
+                "action": "restart",
+                "delay_seconds": delay,
+                "scheduled_at": time.time(),
+                "message": clean_msg,
+            }
+            return {
+                "status": "success",
+                "action": "restart",
+                "delay_seconds": delay,
+                "message": f"Computer restart scheduled in {delay} seconds. Unsaved work should be saved now.",
+            }
+        else:
+            stderr = result.stderr.strip()
+            stdout = result.stdout.strip()
+            return {
+                "error": stderr or stdout or "Failed to initiate Windows restart.",
+                "returncode": result.returncode,
+            }
+    except Exception as e:
+        return {"error": f"System restart execution error: {e}"}
+
+
+def system_cancel_shutdown() -> Dict[str, Any]:
+    """Abort or cancel any currently pending Windows shutdown or restart."""
+    global _PENDING_SYSTEM_ACTION
+    try:
+        result = subprocess.run(["shutdown.exe", "/a"], capture_output=True, text=True, timeout=10)
+        _PENDING_SYSTEM_ACTION = None
+        if result.returncode == 0:
+            return {
+                "status": "success",
+                "action": "cancelled",
+                "message": "Scheduled shutdown or restart has been cancelled.",
+            }
+        else:
+            stderr = result.stderr.strip()
+            return {
+                "status": "info",
+                "message": stderr or "No scheduled shutdown was found to cancel.",
+            }
+    except Exception as e:
+        return {"error": f"Failed to cancel shutdown: {e}"}
+

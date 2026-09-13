@@ -227,34 +227,157 @@ def applications_open(name_or_path: str, args: str = "") -> dict:
         }
 
 
-def applications_close(name_or_pid: str) -> dict:
-    """Close or terminate an application by process name or PID. Warning: Requires approval."""
-    if not name_or_pid:
+_CLOSE_NAME_MAP: dict[str, tuple[str, str]] = {
+    "notepad": ("notepad.exe", "Notepad"),
+    "vs code": ("code.exe", "Visual Studio Code"),
+    "vscode": ("code.exe", "Visual Studio Code"),
+    "visual studio code": ("code.exe", "Visual Studio Code"),
+    "chrome": ("chrome.exe", "Chrome"),
+    "google chrome": ("chrome.exe", "Google Chrome"),
+    "edge": ("msedge.exe", "Edge"),
+    "microsoft edge": ("msedge.exe", "Edge"),
+    "file explorer": ("explorer.exe", "File Explorer"),
+    "explorer": ("explorer.exe", "File Explorer"),
+    "calc": ("calc.exe", "Calculator"),
+    "calculator": ("calc.exe", "Calculator"),
+    "paint": ("mspaint.exe", "Paint"),
+    "wordpad": ("wordpad.exe", "WordPad"),
+}
+
+
+def applications_close(name_or_pid: str, force: bool = False) -> dict:
+    """Close an application safely and gracefully. Never force-kills by default.
+    
+    Attempts graceful window close (WM_CLOSE) first so applications can prompt to save unsaved work.
+    
+    Args:
+        name_or_pid: Application name, window title keyword, process executable, or PID.
+        force: If True, force-kills the process with taskkill /F. Defaults to False (graceful close).
+    """
+    if not name_or_pid or not str(name_or_pid).strip():
         return {"error": "No application name or PID provided"}
 
     target = str(name_or_pid).strip()
+    target_lower = target.lower()
+
+    # Guard against closing protected core system processes or AXON's own process
+    try:
+        from axon.security.process_security import is_protected_process
+        is_prot, reason = is_protected_process(target)
+        if is_prot:
+            return {"error": reason, "blocked": True}
+    except Exception:
+        pass
+
     is_numeric_pid = target.isdigit()
 
+    # 1. Resolve aliases
+    mapped_info = _CLOSE_NAME_MAP.get(target_lower)
+    title_keyword = mapped_info[1] if mapped_info else target
+    exe_name = mapped_info[0] if mapped_info else (target if target_lower.endswith(".exe") else f"{target}.exe")
+
+    # 2. First attempt: Graceful Win32 WM_CLOSE to visible windows
     try:
+        import ctypes
+        from ctypes import wintypes
+        user32 = ctypes.windll.user32
+        WM_CLOSE = 0x0010
+        closed_hwnds = []
+
+        WNDENUMPROC = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+
+        def _enum_cb(hwnd, lparam):
+            if user32.IsWindowVisible(hwnd):
+                # Check PID match if numeric
+                if is_numeric_pid:
+                    w_pid = wintypes.DWORD()
+                    user32.GetWindowThreadProcessId(hwnd, ctypes.byref(w_pid))
+                    if w_pid.value == int(target):
+                        user32.PostMessageW(hwnd, WM_CLOSE, 0, 0)
+                        closed_hwnds.append(hwnd)
+                        return True
+
+                # Check window title match
+                length = user32.GetWindowTextLengthW(hwnd)
+                if length > 0:
+                    buf = ctypes.create_unicode_buffer(length + 1)
+                    user32.GetWindowTextW(hwnd, buf, length + 1)
+                    title = buf.value
+                    if title and (
+                        title_keyword.lower() in title.lower()
+                        or (mapped_info and mapped_info[1].lower() in title.lower())
+                        or target_lower in title.lower()
+                    ):
+                        user32.PostMessageW(hwnd, WM_CLOSE, 0, 0)
+                        closed_hwnds.append(hwnd)
+                        return True
+
+                # Check File Explorer window class
+                if target_lower in ("file explorer", "explorer"):
+                    class_buf = ctypes.create_unicode_buffer(256)
+                    user32.GetClassNameW(hwnd, class_buf, 256)
+                    if class_buf.value in ("CabinetWClass", "ExploreWClass"):
+                        user32.PostMessageW(hwnd, WM_CLOSE, 0, 0)
+                        closed_hwnds.append(hwnd)
+            return True
+
+        user32.EnumWindows(WNDENUMPROC(_enum_cb), 0)
+        if closed_hwnds:
+            return {
+                "status": "success",
+                "closed": True,
+                "target": target,
+                "windows_closed": len(closed_hwnds),
+                "method": "wm_close",
+                "message": f"Successfully sent graceful close message to {len(closed_hwnds)} window(s) of '{target}'",
+            }
+    except Exception:
+        pass
+
+    # Special handling for File Explorer: Do NOT terminate explorer.exe if no folder window was found
+    if target_lower in ("file explorer", "explorer"):
+        return {
+            "status": "success",
+            "closed": False,
+            "target": target,
+            "message": "No open File Explorer windows found to close",
+        }
+
+    # 3. Second attempt: Process termination request via taskkill (graceful by default)
+    try:
+        cmd = ["taskkill"]
         if is_numeric_pid:
-            cmd = ["taskkill", "/PID", target, "/F"]
+            cmd.extend(["/PID", target])
         else:
-            exe_name = target if target.lower().endswith(".exe") else f"{target}.exe"
-            cmd = ["taskkill", "/IM", exe_name, "/F"]
+            cmd.extend(["/IM", exe_name])
+
+        if force:
+            cmd.append("/F")
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         if result.returncode == 0:
             return {
                 "status": "success",
-                "message": result.stdout.strip() or f"Process {target} terminated",
+                "closed": True,
                 "target": target,
+                "method": "force_taskkill" if force else "graceful_taskkill",
+                "message": result.stdout.strip() or f"Process {target} closed successfully",
             }
         else:
             stderr = result.stderr.strip()
             stdout = result.stdout.strip()
+            # If not running, return informative not_found status
+            if "not found" in stderr.lower() or "not found" in stdout.lower() or "could not be found" in stderr.lower():
+                return {
+                    "status": "not_found",
+                    "closed": False,
+                    "target": target,
+                    "message": f"No running instance or window found for '{target}'",
+                }
             return {
                 "error": stderr or stdout or f"Failed to close process {target}",
                 "returncode": result.returncode,
             }
     except Exception as e:
         return {"error": str(e)}
+

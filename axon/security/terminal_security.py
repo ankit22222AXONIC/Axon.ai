@@ -30,6 +30,10 @@ BLOCKED_COMMAND_PATTERNS = [
     (r"(?:del|rm|remove-item)\s+.*(?:\.env|audit\.log)", "Terminal deletion of AXON configuration or audit logs is blocked"),
     (r"(?:cat|type|get-content|head|tail|more|less)\s+.*\.env\b", "Terminal reading of credential files (.env) is blocked"),
 
+    # Windows factory reset / recovery tampering (destructive)
+    (r"\bsystemreset\b", "Windows factory reset utility (systemreset) is blocked"),
+    (r"\breagentc\b", "Windows Recovery Environment tampering is blocked"),
+
     # Destructive Git operations (blocked to prevent code loss)
     (r"\bgit\s+reset\s+--hard\b", "Destructive Git hard reset is blocked"),
     (r"\bgit\s+clean\s+-[a-zA-Z]*f", "Destructive Git clean operation is blocked"),

@@ -1486,22 +1486,58 @@
 
       const argsStr = toolArgs ? Object.entries(toolArgs).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join(', ') : '';
 
+      // Determine customized presentation based on action type
+      let headerText = 'Approval Required to Execute Tool';
+      let titleText = '';
+      let descText = '';
+      let isSystem = false;
+
+      if (toolName === 'system.shutdown') {
+        isSystem = true;
+        headerText = 'SYSTEM ACTION';
+        titleText = 'Shutdown computer?';
+        descText = 'Shutdown will power off your computer. Continue?';
+      } else if (toolName === 'system.restart') {
+        isSystem = true;
+        headerText = 'SYSTEM ACTION';
+        titleText = 'Restart computer?';
+        descText = 'This will restart Windows and may interrupt running applications. Continue?';
+      } else if (toolName === 'browser.close_window') {
+        isSystem = true;
+        headerText = 'BROWSER ACTION';
+        const browserName = toolArgs?.browser_name || 'browser';
+        titleText = `Close ${browserName} window?`;
+        descText = 'Closing this window may cause unsaved tabs or ongoing work to be lost. Continue?';
+      } else if (toolName === 'applications.close') {
+        isSystem = true;
+        headerText = 'APPLICATION ACTION';
+        const target = toolArgs?.name_or_pid || 'application';
+        titleText = `Close ${target}?`;
+        descText = `Closing ${target} may interrupt unsaved work. AXONIC will attempt a graceful close. Continue?`;
+      }
+
       card.innerHTML = `
-        <div class="bg-[#1e1f20] border border-amber-400/30 rounded-2xl p-4 w-full flex flex-col gap-2 shadow-lg shadow-black/40">
+        <div class="bg-[#1e1f20] border ${isSystem ? 'border-amber-400/50' : 'border-amber-400/30'} rounded-2xl p-4 w-full flex flex-col gap-2 shadow-lg shadow-black/40">
           <div class="flex items-center gap-2 text-white font-medium text-sm">
             <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
-            <span>Approval Required to Execute Tool</span>
+            <span class="${isSystem ? 'tracking-wider font-semibold text-amber-300 text-xs uppercase' : ''}">${escapeHtml(headerText)}</span>
           </div>
+
+          ${titleText ? `
+            <div class="text-base font-semibold text-white tracking-tight">${escapeHtml(titleText)}</div>
+            <div class="text-xs text-neutral-300 leading-relaxed">${escapeHtml(descText)}</div>
+          ` : ''}
+
           <div class="font-mono text-xs text-neutral-300 bg-[#131314] p-2.5 rounded-xl border border-white/10">
             <span class="text-amber-400 font-semibold">${escapeHtml(toolName)}</span>
             ${argsStr ? `<div class="mt-1 text-white">${escapeHtml(argsStr)}</div>` : ''}
           </div>
           <div class="flex items-center gap-2 mt-1" id="approval-actions-${reqId}">
+            <button onclick="window.respondApproval('${reqId}', false)" class="px-4 py-1.5 rounded-full bg-[#282a2c] text-neutral-300 hover:text-white text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer">
+              <span>Cancel</span>
+            </button>
             <button onclick="window.respondApproval('${reqId}', true)" class="px-4 py-1.5 rounded-full bg-amber-400 text-neutral-950 text-xs font-semibold hover:bg-amber-300 transition-colors flex items-center gap-1 cursor-pointer">
               <span>Approve</span>
-            </button>
-            <button onclick="window.respondApproval('${reqId}', false)" class="px-4 py-1.5 rounded-full bg-[#282a2c] text-neutral-300 hover:text-white text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer">
-              <span>Deny</span>
             </button>
           </div>
         </div>

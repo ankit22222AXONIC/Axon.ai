@@ -31,10 +31,15 @@ from axon.tools import (
     browser_play_video,
     browser_click_first_result,
     browser_click_link,
+    browser_close_tab,
+    browser_close_window,
     system_info,
     system_resources,
     processes_list,
     processes_find,
+    system_shutdown,
+    system_restart,
+    system_cancel_shutdown,
     terminal_run,
     git_status,
     git_diff,
@@ -225,10 +230,15 @@ class Axon:
         reg.register("browser.play_video", browser_play_video, "Search YouTube for a query and immediately open and play the top video result")
         reg.register("browser.click_first_result", browser_click_first_result, "Click the first search result or video thumbnail in the currently open browser window")
         reg.register("browser.click_link", browser_click_link, "Find and click a link with matching text in the active browser window")
+        reg.register("browser.close_tab", browser_close_tab, "Close the active browser tab or a specific tab matching title")
+        reg.register("browser.close_window", browser_close_window, "Close an entire browser window gracefully (requires approval)")
 
         # System and process tools
         reg.register("system.info", system_info, "Get basic system and OS information")
         reg.register("system.resources", system_resources, "Get system resource metrics including RAM, Disk, CPU, Battery, and Uptime")
+        reg.register("system.shutdown", system_shutdown, "Shut down the computer safely after explicit human approval (requires approval)")
+        reg.register("system.restart", system_restart, "Restart / reboot the computer safely after explicit human approval (requires approval)")
+        reg.register("system.cancel_shutdown", system_cancel_shutdown, "Cancel or abort a pending scheduled shutdown or restart")
         reg.register("processes.list", processes_list, "List running processes")
         reg.register("processes.find", processes_find, "Search running processes by name or PID")
 

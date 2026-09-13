@@ -29,8 +29,18 @@ from .browser import (
     browser_play_video,
     browser_click_first_result,
     browser_click_link,
+    browser_close_tab,
+    browser_close_window,
 )
-from .system import system_info, system_resources, processes_list, processes_find
+from .system import (
+    system_info,
+    system_resources,
+    processes_list,
+    processes_find,
+    system_shutdown,
+    system_restart,
+    system_cancel_shutdown,
+)
 from .terminal import terminal_run
 from .git import (
     git_status,
@@ -98,10 +108,15 @@ __all__ = [
     "browser_play_video",
     "browser_click_first_result",
     "browser_click_link",
+    "browser_close_tab",
+    "browser_close_window",
     "system_info",
     "system_resources",
     "processes_list",
     "processes_find",
+    "system_shutdown",
+    "system_restart",
+    "system_cancel_shutdown",
     "terminal_run",
     "git_status",
     "git_diff",
